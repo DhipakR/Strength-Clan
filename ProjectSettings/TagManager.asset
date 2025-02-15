@@ -58,6 +58,7 @@ TagManager:
   - MultipleAchievementCompletePopup
   - LevelAndStreakPopup
   - ContactUsScreen
+  - InfoBoxPopup
   layers:
   - Default
   - TransparentFX
