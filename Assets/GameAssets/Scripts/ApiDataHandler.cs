@@ -1093,7 +1093,7 @@ public class ApiDataHandler : GenericSingletonClass<ApiDataHandler>
     public TemplateData getTemplateData()
     {
         if(this.templateData == null)
-            return  new TemplateData();
+            this.templateData = new TemplateData();
 
         return this.templateData;
     }

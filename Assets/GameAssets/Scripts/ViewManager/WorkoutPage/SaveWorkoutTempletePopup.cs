@@ -60,6 +60,7 @@ public class SaveWorkoutTempletePopup : MonoBehaviour, IPrefabInitializer
             PopupController.Instance.ClosePopup("SaveWorkoutTempletePopup");
             StateManager.Instance.OpenStaticScreen("dashboard", workoutScreen, "dashboardScreen", null);
             StateManager.Instance.OpenFooter(null, null, false);
+            print("edit");
         }
         else
         {
@@ -72,6 +73,7 @@ public class SaveWorkoutTempletePopup : MonoBehaviour, IPrefabInitializer
             PopupController.Instance.ClosePopup("SaveWorkoutTempletePopup");
             StateManager.Instance.OpenStaticScreen("dashboard", workoutScreen, "dashboardScreen", null);
             StateManager.Instance.OpenFooter(null, null, false);
+            print("new");
         }
     }
     public void NoButton()
