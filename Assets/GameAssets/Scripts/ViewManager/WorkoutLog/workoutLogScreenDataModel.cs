@@ -45,7 +45,6 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         //inputFieldManager.inputFields.Add(exerciseNotes);
         exerciseNameText.text = userSessionManager.Instance.FormatStringAbc(exerciseTypeModel.name);
         exerciseHistory = GetExerciseData(ApiDataHandler.Instance.getHistoryData(), exerciseTypeModel.name, exerciseTypeModel.exerciseType);
-        exerciseHistory.Reverse();
         switch (exerciseTypeModel.exerciseType)
         {
             case ExerciseType.RepsOnly:
@@ -94,27 +93,33 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         else
         {
             prefab = Resources.Load<GameObject>("Prefabs/workoutLog/workoutLogSubItems");
-            //prefab = Resources.Load<GameObject>("Prefabs/createWorkout/createNewSubItems");
         }
+
         GameObject newSubItem = Instantiate(prefab, transform.GetChild(0));
         int childCount = transform.GetChild(0).childCount;
         newSubItem.transform.SetSiblingIndex(childCount - 3);
         WorkoutLogSubItem newSubItemScript = newSubItem.GetComponent<WorkoutLogSubItem>();
         workoutLogSubItems.Add(newSubItemScript);
+
         HistoryExerciseModel history = null;
         if (exerciseHistory.Count > 0)
         {
-            history = exerciseHistory[0];
-            exerciseHistory.RemoveAt(0);
+            // Match sets based on their position in the list
+            int setIndex = exerciseTypeModel.exerciseModel.IndexOf(exerciseModel);
+            if (setIndex < exerciseHistory.Count)
+            {
+                history = exerciseHistory[setIndex];
+            }
         }
+
         Dictionary<string, object> initData = new Dictionary<string, object>
         {
-            {  "data", exerciseModel   },
-            {"exerciseType", exerciseTypeModel.exerciseType  },
-            {"exerciseHistory",history},
-            {"isWorkoutLog",isWorkoutLog }
-            //{"inputManager",inputFieldManager}
+        { "data", exerciseModel },
+        {"exerciseType", exerciseTypeModel.exerciseType },
+        {"exerciseHistory", history },
+        {"isWorkoutLog", isWorkoutLog }
         };
+
         newSubItemScript.onInit(initData, callback);
     }
 
@@ -171,6 +176,29 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
     {
         List<HistoryExerciseModel> exerciseDataList = new List<HistoryExerciseModel>();
 
+        var sortedWorkouts = historyData.exerciseTempleteModel
+            .OrderByDescending(ht => DateTime.Parse(ht.dateTime))
+            .ToList();
+
+        foreach (var workout in sortedWorkouts)
+        {
+            var matchingExercise = workout.exerciseTypeModel
+                .FirstOrDefault(e => e.exerciseName.Equals(exerciseName, StringComparison.OrdinalIgnoreCase));
+
+            if (matchingExercise != null)
+            {
+                exerciseDataList.AddRange(matchingExercise.exerciseModel);
+                break;
+            }
+        }
+
+        return exerciseDataList;
+    }
+    /*
+    public List<HistoryExerciseModel> GetExerciseData(HistoryModel historyData, string exerciseName, ExerciseType type)
+    {
+        List<HistoryExerciseModel> exerciseDataList = new List<HistoryExerciseModel>();
+
         foreach (var template in historyData.exerciseTempleteModel)
         {
             foreach (var exerciseType in template.exerciseTypeModel)
@@ -202,7 +230,7 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         //        break;
         //}
         return exerciseDataList;
-    }
+    }*/
 
     public void UpdateExerciseNotes(HistoryModel historyModel, ExerciseTypeModel exerciseToCheck, string templateName)
     {
