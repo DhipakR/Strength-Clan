@@ -42,6 +42,26 @@ public class WorkoutLogController : MonoBehaviour, PageController
     private DateTime dateTimeOfPause;
     bool back;
     Action<object> callback;
+    bool interruptedLoading = false;
+    private void OnApplicationQuit()
+    {
+        SaveWorkoutData();
+    }
+
+    private void SaveWorkoutData()
+    {
+        templeteModel.dateTimeOfPause = DateTime.Now;
+        templeteModel.dateTimePaused = true;
+        templeteModel.elapsedTime = elapsedTime;
+        string json = JsonUtility.ToJson(templeteModel);
+        PlayerPrefs.SetString("SavedOngoingWorkout", json);
+        PlayerPrefs.Save();
+    }
+    private void LoadWorkoutData(DefaultTempleteModel dataTemplate)
+    {
+        elapsedTime = dataTemplate.elapsedTime + (float)(DateTime.Now - dataTemplate.dateTimeOfPause).TotalSeconds;
+        interruptedLoading = true;
+    }
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
         this.callback = callback;
@@ -49,10 +69,13 @@ public class WorkoutLogController : MonoBehaviour, PageController
 
         if (data.ContainsKey("dataTemplate"))
         {
-
             DefaultTempleteModel dataTemplate = DeepCopy((DefaultTempleteModel)data["dataTemplate"]);
             templeteModel.templeteName= dataTemplate.templeteName;
             //workoutNotes.text = dataTemplate.templeteNotes;
+            if (dataTemplate.dateTimePaused)
+            {
+                LoadWorkoutData(dataTemplate);
+            }
             List<ExerciseTypeModel> list = new List<ExerciseTypeModel>();
             foreach (var exerciseType in dataTemplate.exerciseTemplete)
             {
@@ -157,7 +180,9 @@ public class WorkoutLogController : MonoBehaviour, PageController
         {
             if (isPause)
             {
+                templeteModel.dateTimeOfPause = DateTime.Now;
                 dateTimeOfPause = DateTime.Now;
+                SaveWorkoutData();
             }
             else
             {
@@ -193,8 +218,6 @@ public class WorkoutLogController : MonoBehaviour, PageController
         };
         StateManager.Instance.OpenStaticScreen("exercise", null, "exerciseScreen", mData, true, OnExerciseAdd);
     }
-
-
 
     public void OnExerciseAdd(object data)
     {
@@ -234,7 +257,8 @@ public class WorkoutLogController : MonoBehaviour, PageController
                         Dictionary<string, object> mData = new Dictionary<string, object>
                         {
                             { "data", typeModel }, { "isWorkoutLog", true },{ "isTemplateCreator", isTemplateCreator },
-                            {"templeteModel",templeteModel},{"messageText",this.GetComponent<ScrollRect>()}
+                            {"templeteModel",templeteModel},{"messageText",this.GetComponent<ScrollRect>()},
+                             {"interruptedLoading", interruptedLoading }
                         };
 
                         GameObject exercisePrefab = Resources.Load<GameObject>("Prefabs/workoutLog/workoutLogScreenDataModel");
@@ -242,7 +266,6 @@ public class WorkoutLogController : MonoBehaviour, PageController
                         int childCount = content.childCount;
                         //exerciseObject.transform.SetSiblingIndex(childCount - 2);
                         exerciseObject.GetComponent<workoutLogScreenDataModel>().onInit(mData, ShowMessage);
-                        print("1");
                     }
                 }
             }
@@ -255,13 +278,13 @@ public class WorkoutLogController : MonoBehaviour, PageController
 
                 typeModel = (ExerciseTypeModel)item;
                 templeteModel.exerciseTemplete.Add(typeModel);
-
                 Dictionary<string, object> mData = new Dictionary<string, object>
                 {
                     { "data", typeModel },
                     { "isWorkoutLog", true },
                     {"isTemplateCreator",isTemplateCreator },
-                    {"templeteModel",templeteModel}
+                    {"templeteModel",templeteModel},
+                    {"interruptedLoading", interruptedLoading }
                     //{"inputManager",this.GetComponent<InputFieldManager>()}
                 };
 
@@ -332,6 +355,7 @@ public class WorkoutLogController : MonoBehaviour, PageController
     }
     public void OnFinishPopupOrMessage()
     {
+        DeleteSavedWorkout();
         (int totalSets, int completedSets) = CheckAllSetsComplete();
         if (completedSets == 0)
         {
@@ -376,7 +400,7 @@ public class WorkoutLogController : MonoBehaviour, PageController
         var historyTemplate = new HistoryTempleteModel
         {
             templeteName = templeteModel.templeteName,
-            dateTime = currentDateTime.ToString("MMM dd, yyyy hh:mm tt"),
+            dateTime = currentDateTime.ToString("MMM dd, yyyy hh:mm:ss tt"),
             completedTime = (int)elapsedTime,
             totalWeight = totalWeightInKgs,
             prs = 0 // Assuming PRs are not tracked here. Adjust as needed.
@@ -470,6 +494,11 @@ public class WorkoutLogController : MonoBehaviour, PageController
         }
         return historyTemplate;
     }
+    private void DeleteSavedWorkout()
+    {
+        PlayerPrefs.DeleteKey("SavedOngoingWorkout");
+        PlayerPrefs.Save();
+    }
     public void Finish()
     {
         isTimerRunning = false;
@@ -546,15 +575,13 @@ public class WorkoutLogController : MonoBehaviour, PageController
             StateManager.Instance.OpenStaticScreen("dashboard", gameObject, "dashboardScreen", null);
             StateManager.Instance.OpenFooter(null, null, false);
         }
-
-        
-        
         //}
         //OnBack();
     }
 
     public void OnBack()
     {
+        DeleteSavedWorkout();
         //OnToggleWorkout(null);
         //StateManager.Instance.HandleBackAction(gameObject);
         List<object> initialData = new List<object> { this.gameObject };
@@ -572,6 +599,7 @@ public class WorkoutLogController : MonoBehaviour, PageController
             {
                 foreach (var exercise in exerciseType.exerciseModel)
                 {
+                    print(exercise.weight + "" + exercise.reps);
                     totalWeight += exercise.weight * exercise.reps;
                 }
             }
@@ -586,36 +614,11 @@ public class WorkoutLogController : MonoBehaviour, PageController
     }
     public DefaultTempleteModel DeepCopy(DefaultTempleteModel original)
     {
-        DefaultTempleteModel copy = new DefaultTempleteModel();
-        copy.templeteName = original.templeteName;
-        copy.templeteNotes = original.templeteNotes;
+        // Serialize the object to JSON
+        string json = JsonUtility.ToJson(original);
 
-        // Copy each exercise template
-        foreach (var exercise in original.exerciseTemplete)
-        {
-            ExerciseTypeModel exerciseCopy = new ExerciseTypeModel();
-            exerciseCopy.index = exercise.index;
-            exerciseCopy.name = exercise.name;
-            exerciseCopy.categoryName= exercise.categoryName;
-            exerciseCopy.exerciseType = exercise.exerciseType;
-
-            // Copy each exercise model in the template
-            foreach (var exerciseModel in exercise.exerciseModel)
-            {
-                ExerciseModel exerciseModelCopy = new ExerciseModel();
-                exerciseModelCopy.setID = exerciseModel.setID;
-                exerciseModelCopy.previous = exerciseModel.previous;
-                exerciseModelCopy.weight = exerciseModel.weight;
-                exerciseModelCopy.rir = exerciseModel.rir;
-                exerciseModelCopy.reps = exerciseModel.reps;
-                exerciseModelCopy.toggle = exerciseModel.toggle;
-                exerciseModelCopy.time = exerciseModel.time;
-                exerciseModelCopy.mile = exerciseModel.mile;
-
-                exerciseCopy.exerciseModel.Add(exerciseModelCopy);
-            }
-            copy.exerciseTemplete.Add(exerciseCopy);
-        }
+        // Deserialize the JSON back into a new object
+        DefaultTempleteModel copy = JsonUtility.FromJson<DefaultTempleteModel>(json);
 
         return copy;
     }

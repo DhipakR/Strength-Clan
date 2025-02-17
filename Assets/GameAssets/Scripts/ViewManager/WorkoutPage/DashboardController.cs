@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using static WorkoutLogController;
 
 public class DashboardController : MonoBehaviour, PageController, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -29,6 +29,17 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
         workout.onClick.AddListener(AudioController.Instance.OnButtonClick);
         split.onClick.AddListener(AudioController.Instance.OnButtonClick);
         StreakAndCharacterManager.Instance.UpdateStreak();
+
+        CheckSavedOngoingWorkout();
+    }
+    private void CheckSavedOngoingWorkout()
+    {
+        if (PlayerPrefs.HasKey("SavedOngoingWorkout"))
+        {
+            List<object> initialData = new List<object> { this.gameObject };
+            Action<List<object>> onFinish = (data) => { };
+            PopupController.Instance.OpenPopup("workoutLog", "ContinueWorkoutPopup", onFinish, initialData);
+        }
     }
     private void OnEnable()
     {
@@ -40,8 +51,6 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
         Workout();
         isWorkout = true;
     }
-
-
     public void Play()
     {
         if (userSessionManager.Instance.selectedTemplete != null)
@@ -69,18 +78,16 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
     }
     public void StartEmptyWorkout()
     {
-        DefaultTempleteModel exercise=new DefaultTempleteModel();
+        DefaultTempleteModel exercise = new();
         exercise.templeteName="Workout " + content.childCount.ToString();
         Dictionary<string, object> mData = new Dictionary<string, object>
         {
             {"dataTemplate", exercise }, { "isTemplateCreator", true }
         };
         Action<object> callback = onReloadData;
-
         StateManager.Instance.OpenStaticScreen("workoutLog", gameObject, "workoutLogScreen", mData, true, callback, true);
         StateManager.Instance.CloseFooter();
     }
-
     public void onReloadData(object data)
     {
         foreach (Transform child in content)
@@ -115,7 +122,6 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
             itemController.onInit(mData,StartEmptyWorkoutWithTemplate);
         }
     }
-
     public void StartEmptyWorkoutWithTemplate(object exercise)
     {
         Dictionary<string, object> mData = new Dictionary<string, object>

@@ -83,6 +83,7 @@ public class historyScreenDataModel : MonoBehaviour, ItemController
             {
             { "workout",historyWorkout }
             };
+        print(mData);
         StateManager.Instance.OpenStaticScreen("history", mainParent, "completeWorkoutHistoryScreen", mData,true);
         StateManager.Instance.CloseFooter();
     }

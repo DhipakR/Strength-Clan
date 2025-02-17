@@ -22,7 +22,7 @@ public class CompleteWorkoutController : MonoBehaviour, IPrefabInitializer
         workoutScreen = (GameObject)data[1];
         workoutNameText.text=userSessionManager.Instance.FormatStringAbc(historyWorkout.templeteName);
         string savedDate = historyWorkout.dateTime;
-        DateTime parsedDate = DateTime.ParseExact(savedDate, "MMM dd, yyyy hh:mm tt", System.Globalization.CultureInfo.InvariantCulture);
+        DateTime parsedDate = DateTime.ParseExact(savedDate, "MMM dd, yyyy hh:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
         string formattedDate = parsedDate.ToString("dddd, dd MMMM yyyy");
         dateText.text=formattedDate;
         if (historyWorkout.completedTime > 60)

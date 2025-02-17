@@ -59,6 +59,7 @@ TagManager:
   - LevelAndStreakPopup
   - ContactUsScreen
   - InfoBoxPopup
+  - ContinueWorkoutPopup
   layers:
   - Default
   - TransparentFX

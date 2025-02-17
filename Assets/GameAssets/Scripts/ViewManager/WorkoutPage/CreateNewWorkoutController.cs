@@ -25,8 +25,10 @@ public class CreateNewWorkoutController : MonoBehaviour,PageController
     int index;
     bool editWorkout;
     Action<object> callback;
+    bool interruptedLoading;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
+        interruptedLoading = data.TryGetValue("interruptedLoading", out var value) ? (bool)value : false;
         editWorkout = (bool)data["editWorkout"];
         if(editWorkout)
         {
@@ -121,7 +123,8 @@ public class CreateNewWorkoutController : MonoBehaviour,PageController
                             { "data", typeModel },
                             { "isWorkoutLog", false },
                             { "isTemplateCreator", true },
-                            {"templeteModel", templeteModel}
+                            {"templeteModel", templeteModel},
+                            {"interruptedLoading", interruptedLoading }
                         };
 
                         GameObject exercisePrefab = Resources.Load<GameObject>("Prefabs/workoutLog/workoutLogScreenDataModel");
@@ -148,8 +151,9 @@ public class CreateNewWorkoutController : MonoBehaviour,PageController
                     { "data", typeModel },
                     { "isWorkoutLog", false },
                     {"isTemplateCreator",true },
-                    {"templeteModel", templeteModel}
-                };
+                    {"templeteModel", templeteModel},
+                    { "interruptedLoading", interruptedLoading }
+            };
 
                 GameObject exercisePrefab = Resources.Load<GameObject>("Prefabs/workoutLog/workoutLogScreenDataModel");
                 GameObject exerciseObject = Instantiate(exercisePrefab, content);
