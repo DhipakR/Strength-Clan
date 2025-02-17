@@ -21,6 +21,7 @@ public class CharacterController : MonoBehaviour, PageController
     public SkeletonGraphic characterSkeletonGraphic;
     public SkeletonDataAsset[] characterSkeletonDataVer1;
     public SkeletonDataAsset[] characterSkeletonDataVer2;
+    private string animName = "";
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
         levelText.GetComponent<Button>().onClick.AddListener(LevelDetailPopup);
@@ -130,6 +131,7 @@ public class CharacterController : MonoBehaviour, PageController
     }
     private void UpdateCharacterView()
     {
+        //userSessionManager.Instance.characterLevel = 3;
         switch (currentSide)
         {
             case CharacterSide.Front:
@@ -223,6 +225,7 @@ public class CharacterController : MonoBehaviour, PageController
                 //LoadSpriteFromFolder(userSessionManager.Instance.clotheName + " back");
                 break;
         }
+        SetAnimation(characterSkeletonGraphic, animName, true);
     }
     private void LoadSpriteFromFolder(string folderName)
     {
@@ -320,11 +323,16 @@ public class CharacterController : MonoBehaviour, PageController
     }
     private string GetNameSkin(string nameSkinCheck)
     {
+        if (userSessionManager.Instance.characterLevel >= 4)
+            animName = "idle_suite";
+        else
+            animName = "idle";
         string nameSkinSet = "default";
         switch (nameSkinCheck)
         {
             case "armour":
                 nameSkinSet = "armor";
+
                 break;
             case "axe warrior":
                 nameSkinSet = "warrior";
@@ -358,6 +366,33 @@ public class CharacterController : MonoBehaviour, PageController
                 break;
         }
         return nameSkinSet;
+    }
+    public void SetAnimation(SkeletonGraphic ske, string name, bool loop, float timeScale = 1f, Action callBack = null, Action callBackStart = null)
+    {
+        if (!ske.gameObject.activeInHierarchy) return;
+        StartCoroutine(WaitSkeleton(ske, () =>
+        {
+            Spine.Animation runAnimation = ske.SkeletonData.FindAnimation(name);
+            if (runAnimation != null)
+            {
+                TrackEntry animationEntry = ske.AnimationState.SetAnimation(0, name, loop);
+                animationEntry.TimeScale = timeScale;
+
+                if (callBackStart != null)
+                {
+                    animationEntry.Start += trackEntry => { callBackStart(); };
+                }
+
+                if (callBack != null)
+                {
+                    animationEntry.Complete += trackEntry => { callBack(); };
+                }
+            }
+            else
+            {
+                Debug.LogError(string.Format("{0} is null", name));
+            }
+        }));
     }
     #endregion
 }
