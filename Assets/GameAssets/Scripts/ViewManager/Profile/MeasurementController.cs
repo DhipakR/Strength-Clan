@@ -6,7 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MeasurementController : MonoBehaviour,PageController
+public class MeasurementController : MonoBehaviour, PageController
 {
     public Button saveButton;
     public TextMeshProUGUI messageText;
@@ -28,7 +28,7 @@ public class MeasurementController : MonoBehaviour,PageController
     public TMP_InputField rightCalf;
     public List<Button> buttons;
 
-    public List<MeasurementHistoryItem> historyItems=new List<MeasurementHistoryItem>();
+    public List<MeasurementHistoryItem> historyItems = new List<MeasurementHistoryItem>();
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
         InitializeInputFields();
@@ -47,7 +47,7 @@ public class MeasurementController : MonoBehaviour,PageController
     }
     void AddListeners()
     {
-        foreach(Button button in buttons)
+        foreach (Button button in buttons)
         {
             TMP_InputField input = button.transform.parent.GetComponentInChildren<TMP_InputField>();
             button.onClick.AddListener(() => userSessionManager.Instance.ActiveInput(input));
@@ -61,7 +61,11 @@ public class MeasurementController : MonoBehaviour,PageController
                 weight.onEndEdit.AddListener(value => OnInputEditEnd(value, targetField: ref ApiDataHandler.Instance.getMeasurementData().weight, "kg", weight, "weight"));
                 break;
             case WeightUnit.lbs:
-                weight.onEndEdit.AddListener(value => OnInputEditEnd(value, targetField: ref ApiDataHandler.Instance.getMeasurementData().weight, "lbs",weight, "weight"));
+                weight.onEndEdit.AddListener(value => 
+                {
+                    OnInputEditEnd(value, targetField: ref ApiDataHandler.Instance.getMeasurementData().weight, "lbs", weight, "weight");
+                    weight.text = Math.Round(ApiDataHandler.Instance.getMeasurementData().weight * 2.2f) + " lbs";
+                });
                 break;
         }
         //weight.onEndEdit.AddListener(value => OnInputEditEnd(value, targetField: ref ApiDataHandler.Instance.getMeasurementData().weight, "kg"));
@@ -89,7 +93,7 @@ public class MeasurementController : MonoBehaviour,PageController
                 weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " kg";
                 break;
             case WeightUnit.lbs:
-                weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " lbs";
+                weight.text = Math.Round(ApiDataHandler.Instance.getMeasurementData().weight * 2.2f) + " lbs";
                 break;
         }
         //weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " kg";
@@ -109,14 +113,17 @@ public class MeasurementController : MonoBehaviour,PageController
     }
 
     // Generic function to handle input editing and update the MeasurementModel
-    public void OnInputEditEnd(string value, ref float targetField, string unit,TMP_InputField text, string name)
+    public void OnInputEditEnd(string value, ref float targetField, string unit, TMP_InputField text, string name)
     {
         // Remove the unit from the input string before parsing
         string cleanedValue = value.Replace(unit, "").Trim();
 
         if (float.TryParse(cleanedValue, out float result))
         {
-            targetField = result;  // Update the corresponding field in the MeasurementModel
+            if (unit == "lbs" && name == "weight")
+                targetField = (float)Math.Round(result / 2.2f);
+            else
+                targetField = result;  // Update the corresponding field in the MeasurementModel
         }
         else
         {
@@ -126,15 +133,15 @@ public class MeasurementController : MonoBehaviour,PageController
         // Update the input field to reflect the value with the unit
         UpdateInputFieldWithUnit(targetField, unit, text);
 
-        foreach(MeasurementHistoryItem item in historyItems)
+        foreach (MeasurementHistoryItem item in historyItems)
         {
-            if(item.name== name)
+            if (item.name == name)
             {
                 historyItems.Remove(item);
                 break;
             }
         }
-        MeasurementHistoryItem newItem = new MeasurementHistoryItem { name = name, dateTime=DateTime.Now.ToString("MMM dd, yyyy hh:mm tt"), value=result};
+        MeasurementHistoryItem newItem = new MeasurementHistoryItem { name = name, dateTime = DateTime.Now.ToString("MMM dd, yyyy hh:mm tt"), value = result };
         historyItems.Add(newItem);
     }
 
@@ -155,11 +162,11 @@ public class MeasurementController : MonoBehaviour,PageController
     {
         if (historyItems.Count > 0)
         {
-            int historyIndex=ApiDataHandler.Instance.getMeasurementHistory().measurmentHistory.Count;
+            int historyIndex = ApiDataHandler.Instance.getMeasurementHistory().measurmentHistory.Count;
             ApiDataHandler.Instance.SaveMeasurementData();
             foreach (MeasurementHistoryItem item in historyItems)
             {
-                ApiDataHandler.Instance.SaveMeasurementHistory(item,historyIndex);
+                ApiDataHandler.Instance.SaveMeasurementHistory(item, historyIndex);
                 ApiDataHandler.Instance.SetMeasurementHistory(item);
                 historyIndex++;
             }

@@ -7,6 +7,7 @@ using Assets.SimpleGoogleSignIn.Scripts;
 using System.Collections;
 using Firebase;
 using Firebase.Auth;
+using System.Threading.Tasks;
 
 public class AuthController : MonoBehaviour, PageController
 {
@@ -85,7 +86,7 @@ public class AuthController : MonoBehaviour, PageController
     }
     public void Start()
     {
-       
+
     }
 
     IEnumerator prelaodAssets()
@@ -118,16 +119,16 @@ public class AuthController : MonoBehaviour, PageController
         print(mUsername);
         if (mUsername.Length > 2)
         {
-           if (mUsername.Contains("@"))
-           {
-               mUsername = HelperMethods.Instance.ExtractUsernameFromEmail(mUsername);
-           }
-           userSessionManager.Instance.OnInitialize(mUsername, mUsername);
-           onSignIn();
+            if (mUsername.Contains("@"))
+            {
+                mUsername = HelperMethods.Instance.ExtractUsernameFromEmail(mUsername);
+            }
+            userSessionManager.Instance.OnInitialize(mUsername, mUsername);
+            onSignIn();
         }
         else if (mUsername == "")
         {
-           PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" /*+ userSessionManager.Instance.mProfileUsername*/, true);
+            PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" /*+ userSessionManager.Instance.mProfileUsername*/, true);
         }
         if (FirebaseManager.Instance.user != null)
         {
@@ -166,7 +167,7 @@ public class AuthController : MonoBehaviour, PageController
             GlobalAnimator.Instance.FadeInLoader();
             GoogleAuth.SignIn(OnSignIn, caching: true);
         }
-        
+
 
     }
 
@@ -188,7 +189,7 @@ public class AuthController : MonoBehaviour, PageController
             Action mCallbackSuccess = () =>
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                userSessionManager.Instance.mProfileID=FirebaseManager.Instance.user.UserId;
+                userSessionManager.Instance.mProfileID = FirebaseManager.Instance.user.UserId;
                 onSignIn();
             };
             FirebaseManager.Instance.OnTryRegisterNewAccount(userInfo.email, "z4zazgS4LaejfKcs", mCallbackSuccess, null);
@@ -226,10 +227,10 @@ public class AuthController : MonoBehaviour, PageController
         gameObject.transform.parent.SetSiblingIndex(1);
         StateManager.Instance.isProcessing = false;
         bool mFirsTimePlanInitialized = PreferenceManager.Instance.GetBool("FirstTimePlanInitialized_" /*+ userSessionManager.Instance.mProfileUsername*/, false);
-        GlobalAnimator.Instance.FadeInLoader();
+        GlobalAnimator.Instance.FadeOutLoader();
         CheckUserNameSet();
 
-        
+
     }
     public void CheckUserNameSet()
     {
@@ -337,7 +338,7 @@ public class AuthController : MonoBehaviour, PageController
                 GlobalAnimator.Instance.FadeOutLoader();
                 Dictionary<string, object> mData = new Dictionary<string, object>
                 {
-                 };
+                };
                 StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", mData);
             }
         });
@@ -368,7 +369,7 @@ public class AuthController : MonoBehaviour, PageController
             }
         });
     }
-    void ChangeYPosition(RectTransform rectTransform,float yPos)
+    void ChangeYPosition(RectTransform rectTransform, float yPos)
     {
         Vector2 newPosition = rectTransform.anchoredPosition;
         newPosition.y = yPos;
@@ -387,7 +388,7 @@ public class AuthController : MonoBehaviour, PageController
 
 
 
-    public void OnTrigger()
+    public async void OnTrigger()
     {
         AudioController.Instance.OnButtonClick();
         if (this.mAuthType == AuthConstant.sAuthTypeLogin)
@@ -437,19 +438,50 @@ public class AuthController : MonoBehaviour, PageController
         }
         else if (this.mAuthType == AuthConstant.sAuthTypeSignup)
         {
-            if (aPassword.text != aReEnterPassword.text)
+            if (aPassword.text.Length < 6)
+            {
+                aError.text = "Password must be 6 characters or longer";
+                aError.gameObject.SetActive(true);
+                return;
+            }
+            else if (aPassword.text != aReEnterPassword.text)
             {
                 aError.text = "Password does't match";
                 aError.gameObject.SetActive(true);
                 return;
             }
+            else if (aUsername.text != "")
+            {
+                if (aUsername.text.Contains("@gmail.com") && aUsername.text.Length > 10)
+                {
+                    bool emailExists = await CheckEmailAlreadyInUse(aUsername.text, aPassword.text);
+                    if (emailExists)
+                    {
+                        aError.text = "Email already in use";
+                        aError.gameObject.SetActive(true);
+                        return;
+                    }
+                }
+                else
+                {
+                    aError.text = "Email not valid";
+                    aError.gameObject.SetActive(true);
+                    return;
+                }
+            }
+            else if (aUsername.text == "")
+            {
+                aError.text = "Email not valid";
+                aError.gameObject.SetActive(true);
+                return;
+            }
+
             Action callbackSuccess = () =>
             {
                 GlobalAnimator.Instance.FadeOutLoader();
 
                 print("true");
                 //PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" + userSessionManager.Instance.mProfileUsername, true);
-
                 GameObject alertPrefab = Resources.Load<GameObject>("Prefabs/alerts/alertSuccess");
                 GameObject alertsContainer = GameObject.FindGameObjectWithTag("alerts");
                 GameObject instantiatedAlert = Instantiate(alertPrefab, alertsContainer.transform);
@@ -482,7 +514,27 @@ public class AuthController : MonoBehaviour, PageController
             FirebaseManager.Instance.OnTryRegisterNewAccount(this.aUsername.text, this.aPassword.text, callbackSuccess, callbackFailure);
         }
     }
-
+    public async Task<bool> CheckEmailAlreadyInUse(string email, string password)
+    {
+        try
+        {
+            FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+            await auth.CreateUserWithEmailAndPasswordAsync(email, password);
+            return false;
+        }
+        catch (FirebaseException ex)
+        {
+            if ((AuthError)ex.ErrorCode == AuthError.EmailAlreadyInUse)
+            {
+                return true;
+            }
+            else
+            {
+                Debug.LogError("Fail Firebase: " + ex.Message);
+                return false;
+            }
+        }
+    }
 
     public void OnForgotPassword()
     {
@@ -532,7 +584,7 @@ public class AuthController : MonoBehaviour, PageController
 
 
 
-        
+
 
     }
 
@@ -541,7 +593,7 @@ public class AuthController : MonoBehaviour, PageController
     public void OnSignGmail()
     {
         GmailSignIn();
-      
+
     }
 
 

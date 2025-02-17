@@ -1,0 +1,118 @@
+croco1.png
+size:2020,1088
+filter:Linear,Linear
+pma:true
+scale:0.4
+Layer 2
+bounds:959,0,96,86
+arm
+bounds:1841,437,164,270
+arm1
+bounds:695,176,142,269
+offsets:0,0,142,270
+rotate:90
+arm2
+bounds:375,254,157,276
+arm3
+bounds:550,71,143,276
+armour down
+bounds:966,88,230,150
+offsets:0,0,234,150
+rotate:90
+body
+bounds:534,349,206,222
+body1
+bounds:534,349,206,222
+body2
+bounds:1138,802,286,480
+rotate:90
+boxing/1
+bounds:0,532,442,556
+eyelid
+bounds:1057,40,58,46
+eyelid1
+bounds:824,23,58,40
+eyelid2
+bounds:1251,0,58,37
+eyelid3
+bounds:444,534,58,37
+gym/1
+bounds:752,320,366,382
+rotate:90
+head band
+bounds:1057,4,192,33
+head band1
+bounds:659,28,35,101
+rotate:90
+head band2
+bounds:1878,0,56,94
+rotate:90
+leg
+bounds:1361,36,115,223
+rotate:90
+leg1
+bounds:1816,161,112,236
+lrg1
+bounds:1118,39,112,241
+rotate:90
+lrg2
+bounds:695,65,109,262
+rotate:90
+ninja/belt
+bounds:0,80,373,450
+original/Layer 134
+bounds:1136,153,342,362
+rotate:90
+pants back
+bounds:0,17,202,61
+shirt r
+bounds:1518,399,308,321
+rotate:90
+shirt_back
+bounds:550,7,62,107
+rotate:90
+shoulder 1
+bounds:1778,44,110,98
+rotate:90
+shoulder 2
+bounds:294,1,49,77
+suite/1
+bounds:752,688,384,400
+superhero/1
+bounds:1500,156,241,314
+rotate:90
+superhero/2
+bounds:1620,709,379,385
+rotate:90
+warrior/axe
+bounds:375,30,173,222
+warrior/boot
+bounds:444,573,306,515
+warrior/tattos
+bounds:1586,28,126,190
+offsets:0,0,242,190
+rotate:90
+warrior/tattos1
+bounds:1518,714,96,86
+warrior/tattos2
+bounds:1990,118,30,38
+warrior/tattos3
+bounds:884,15,48,49
+rotate:90
+warrior/tattos4
+bounds:762,5,58,60
+offsets:0,0,59,60
+rotate:90
+zeus/Layer 134
+bounds:1930,252,89,149
+zeus/arm
+bounds:204,0,78,88
+rotate:90
+zeus/arm-1
+bounds:1930,158,75,92
+zeus/belt
+bounds:1841,403,176,32
+zeus/border
+bounds:1138,497,378,303
+zeus/shoulder 1
+bounds:1878,58,110,98

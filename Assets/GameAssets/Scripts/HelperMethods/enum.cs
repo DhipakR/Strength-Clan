@@ -80,7 +80,10 @@ public enum CharacterSide
 {
     Front,
     Side,
-    Back
+    Back,
+    BackLeft,
+    FrontLeft,
+    SideLeft
 }
 public enum ShopProductNames
 {
