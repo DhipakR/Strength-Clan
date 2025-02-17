@@ -131,7 +131,7 @@ public class CharacterController : MonoBehaviour, PageController
     }
     private void UpdateCharacterView()
     {
-        //userSessionManager.Instance.characterLevel = 3;
+        //userSessionManager.Instance.characterLevel = 4;
         switch (currentSide)
         {
             case CharacterSide.Front:
@@ -323,46 +323,54 @@ public class CharacterController : MonoBehaviour, PageController
     }
     private string GetNameSkin(string nameSkinCheck)
     {
-        if (userSessionManager.Instance.characterLevel >= 4)
-            animName = "idle_suite";
-        else
+        if (userSessionManager.Instance.characterLevel < 4)
             animName = "idle";
         string nameSkinSet = "default";
         switch (nameSkinCheck)
         {
             case "armour":
                 nameSkinSet = "armor";
-
+                animName = "idle_armor";
                 break;
             case "axe warrior":
                 nameSkinSet = "warrior";
+                animName = "idle_warrior";
                 break;
             case "boxing":
                 nameSkinSet = "boxing";
+                animName = "idle_boxing";
                 break;
             case "compression shirt":
                 nameSkinSet = "gym";
+                animName = "idle_gym";
                 break;
             case "karate gi":
                 nameSkinSet = "karate";
+                animName = "idle_karate";
                 break;
             case "ninja":
                 nameSkinSet = "ninja";
+                animName = "idle_ninja";
                 break;
             case "no clothes":
                 nameSkinSet = "default";
+                animName = "idle";
                 break;
             case "suit":
                 nameSkinSet = "suite";
+                animName = "idle_suite";
                 break;
             case "superhero":
                 nameSkinSet = "superhero";
+                animName = "idle_superhero";
                 break;
             case "trenches":
                 nameSkinSet = "original";
+                animName = "idle_original";
                 break;
             case "zeus":
                 nameSkinSet = "zeus";
+                animName = "idle_zeus";
                 break;
         }
         return nameSkinSet;
