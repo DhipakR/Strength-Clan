@@ -15,7 +15,7 @@ public class WorkoutLogScreenDataModelInfoBox : MonoBehaviour
 
     public void InfoShowOpen()
     {
-        string name = transform.parent.name;
+        string name = transform.name;
         string give = "";
         if (name.Contains("rir"))
         {

@@ -42,9 +42,25 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
         //inputFieldManager.inputFields.Add(timerText);
         //inputFieldManager.inputFields.Add(weight);
         //inputFieldManager.inputFields.Add(reps);
-        ResetModel(exerciseModel);
+        bool il = data.TryGetValue("interruptedLoading", out var value) ? (bool)value : false;
+        if (il)
+        {
+            previous.text = exerciseModel.previous;
+            weight.text = exerciseModel.weight.ToString();
+            reps.text = exerciseModel.reps.ToString();
+            timerText.text = exerciseModel.time.ToString();
+            mile.text = exerciseModel.mile.ToString();
+            rir.value = exerciseModel.rir;
+            rpe.value = exerciseModel.rpe;
+            isComplete.isOn = exerciseModel.toggle;
+            timerText.text = FormatTime(exerciseModel.time.ToString());
+        }
+        else
+        {
+            ResetModel(exerciseModel);
+        }
         sets.text = exerciseModel.setID.ToString();
-        previous.text = exerciseModel.previous;
+
         if (!isWorkoutLog)
         {
             OffAllInteractables();
@@ -159,6 +175,7 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
         model.mile= 0;
         model.toggle = false;
     }
+
     private void OnEnable()
     {
         reps.transform.parent.GetChild(1).GetComponent<Button>().onClick.AddListener(()=>userSessionManager.Instance.ActiveInput(reps));
@@ -284,42 +301,8 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
     {
         print(input);
 
-        // Remove colons and trim the input
-        input = input.Replace(":", "").Trim();
-
-        // Remove all leading zeros by converting to an integer and back to string
-        if (!string.IsNullOrEmpty(input))
-        {
-            input = int.Parse(input).ToString();
-        }
-        else
-        {
-            input = "0"; // Handle empty input
-        }
-
-        // Limit the input to 6 characters (HHMMSS format)
-        if (input.Length > 6) input = input.Substring(0, 6);
-
-        // Format the input based on its length
-        string formattedInput = "";
-        if (input.Length <= 2)
-        {
-            // SS
-            formattedInput = input.PadLeft(2, '0'); // Ensure at least "00"
-            formattedInput = "00:" + formattedInput;
-        }
-        else if (input.Length <= 4)
-        {
-            // MM:SS
-            formattedInput = input.PadLeft(4, '0'); // Ensure at least "0000"
-            formattedInput = formattedInput.Insert(2, ":");
-        }
-        else
-        {
-            // HH:MM:SS
-            formattedInput = input.PadLeft(6, '0'); // Ensure at least "000000"
-            formattedInput = formattedInput.Insert(2, ":").Insert(5, ":");
-        }
+        // Format the input
+        string formattedInput = FormatTime(input);
 
         // Update the timer text
         timerText.text = formattedInput;
@@ -360,13 +343,52 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
             {
                 isComplete.isOn = false;
                 exerciseModel.toggle = false;
-                //isComplete.targetGraphic.color = new Color32(81, 14, 14, 255);
             }
         }
 
         UpdateToggleInteractableState();
     }
-    
+    private string FormatTime(string input)
+    {
+        // Remove colons and trim the input
+        input = input.Replace(":", "").Trim();
+
+        // Remove all leading zeros by converting to an integer and back to string
+        if (!string.IsNullOrEmpty(input))
+        {
+            input = int.Parse(input).ToString();
+        }
+        else
+        {
+            input = "0"; // Handle empty input
+        }
+
+        // Limit the input to 6 characters (HHMMSS format)
+        if (input.Length > 6) input = input.Substring(0, 6);
+
+        // Format the input based on its length
+        string formattedInput = "";
+        if (input.Length <= 2)
+        {
+            // SS
+            formattedInput = input.PadLeft(2, '0'); // Ensure at least "00"
+            formattedInput = "00:" + formattedInput;
+        }
+        else if (input.Length <= 4)
+        {
+            // MM:SS
+            formattedInput = input.PadLeft(4, '0'); // Ensure at least "0000"
+            formattedInput = formattedInput.Insert(2, ":");
+        }
+        else
+        {
+            // HH:MM:SS
+            formattedInput = input.PadLeft(6, '0'); // Ensure at least "000000"
+            formattedInput = formattedInput.Insert(2, ":").Insert(5, ":");
+        }
+
+        return formattedInput;
+    }
     private IEnumerator StartTimer()
     {
         float timer = 0;

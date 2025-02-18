@@ -806,7 +806,7 @@ GameObject:
   - component: {fileID: 5446069253419066432}
   - component: {fileID: 4189508760292703495}
   m_Layer: 5
-  m_Name: Save
+  m_Name: Finish
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

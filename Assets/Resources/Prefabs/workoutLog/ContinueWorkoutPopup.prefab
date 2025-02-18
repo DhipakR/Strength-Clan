@@ -132,9 +132,9 @@ GameObject:
   - component: {fileID: 5237242961438324424}
   - component: {fileID: 1501156527835721504}
   - component: {fileID: 2370214830019517383}
-  - component: {fileID: -7595695176123740300}
+  - component: {fileID: 8670004024019905668}
   m_Layer: 5
-  m_Name: FinishWorkoutPopup
+  m_Name: ContinueWorkoutPopup
   m_TagString: FinishWorkoutPopup
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -211,7 +211,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
---- !u!114 &-7595695176123740300
+--- !u!114 &8670004024019905668
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -220,15 +220,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2898659439138738461}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 69ca00371e0f07946b56720797bb5b17, type: 3}
+  m_Script: {fileID: 11500000, guid: 57627d2742912d64586756d300ed0b1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  messageText: {fileID: 6273068544491086425}
-  saveButton: {fileID: 422622056015254300}
-  discardButton: {fileID: 2071439789645442852}
+  continueButton: {fileID: 422622056015254300}
+  cancelButton: {fileID: 2071439789645442852}
   fade: {fileID: 3390468500675645082}
-  workoutScreen: {fileID: 0}
-  isTemplateCreator: 0
 --- !u!1 &3124635634564169174
 GameObject:
   m_ObjectHideFlags: 0
@@ -295,7 +292,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: finish workout
+  m_text: continue
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d041fdd4e804204d8116890ad0510d7, type: 2}
   m_sharedMaterial: {fileID: 3604901933614619074, guid: 9d041fdd4e804204d8116890ad0510d7, type: 2}
@@ -473,8 +470,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: All invalid/empty sets will be discarded. All sets with valid data will
-    be automatically marked as completed.
+  m_text: An interrupted workout was found! Do you wish to continue? Or do you want
+    to cancel that workout?
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -501,8 +498,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 16
+  m_fontSizeBase: 16
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1047,7 +1044,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Finish workout?
+  m_text: Continue Workout
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9d041fdd4e804204d8116890ad0510d7, type: 2}
   m_sharedMaterial: {fileID: 3604901933614619074, guid: 9d041fdd4e804204d8116890ad0510d7, type: 2}
@@ -1110,7 +1107,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 0, z: -39.252808, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0

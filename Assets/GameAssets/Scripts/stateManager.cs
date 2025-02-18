@@ -9,21 +9,27 @@ public class StateManager : GenericSingletonClass<StateManager>
     public GameObject footer;
     public bool isProcessing = false;
 
-    public void OpenStaticScreen(string folderPath, GameObject currentPage, string newPage, Dictionary<string, object> data, bool keepState = false, Action<object> callback = null,bool isfooter=false)
+    public void OpenStaticScreen(string folderPath, GameObject currentPage, string newPage, Dictionary<string, object> data, bool keepState = false, Action<object> callback = null, bool isfooter = false, int i = 0)
     {
-        if (isProcessing) return;
+        if (isProcessing)
+        {
+            return;
+        }
+
         isProcessing = true;
 
         if (!keepState)
         {
             onRemoveBackHistory();
         }
-
         var prefabPath = "Prefabs/"+ folderPath + "/" + newPage;
         var prefabResource = Resources.Load<GameObject>(prefabPath);
         var prefab = Instantiate(prefabResource);
         var container = GameObject.FindGameObjectWithTag(newPage);
-        container.transform.SetSiblingIndex(container.transform.parent.childCount - 2);
+        Debug.LogWarning($"({folderPath}) {container.transform.parent.childCount - (2 + i)}");
+
+
+        container.transform.SetSiblingIndex(container.transform.parent.childCount - (2+i));
         prefab.transform.SetParent(container.transform, false);
         var mController = prefab.GetComponent<PageController>();
         mController.onInit(data, callback);
@@ -43,7 +49,10 @@ public class StateManager : GenericSingletonClass<StateManager>
                 }
                 isProcessing = false;
             };
-            GlobalAnimator.Instance.ApplyParallax(currentPage, prefab, callbackSuccess, keepState);
+            if(folderPath != "userName")
+            {
+                GlobalAnimator.Instance.ApplyParallax(currentPage, prefab, callbackSuccess, keepState);
+            }
         }
         else
         {
@@ -51,7 +60,6 @@ public class StateManager : GenericSingletonClass<StateManager>
         }
         if (isfooter)
             callback?.Invoke(null);
-        userSessionManager.Instance.currentScreen = prefab.gameObject;
     }
 
     public void openSidebar(string folderPath, GameObject currentPage, string newPage)
