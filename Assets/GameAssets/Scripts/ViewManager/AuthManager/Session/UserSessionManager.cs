@@ -65,10 +65,10 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         darkButtonColor = new Color32(255,255,255,255);
         lightButtonColor = new Color32(218,52,52,255);
         darkPlaceholder = new Color32(127,77,77,255);
-        lightPlaceholder = new Color32(92, 59, 28, 155);
+        lightPlaceholder = new Color32(92, 74, 28, 40);
         darkInputFieldColor = new Color32(81,14,14,255);
         lightInputFieldColor = new Color32(246,236,220,255);
-        darkLineColor = new Color32(246, 236, 220, 85);
+        darkLineColor = new Color32(92, 74, 28, 40);
         darkSwitchTextColor = new Color32(171, 162, 162, 255);
         lightXPbutton = new Color32(167, 200, 33, 255);
         darkXPbutton = new Color32(241, 183, 32, 255);
@@ -316,7 +316,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 
@@ -362,7 +362,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text= "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text= "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 
@@ -408,7 +408,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 
@@ -454,7 +454,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 
@@ -506,7 +506,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
         //descriptionText.text = _data.achievementData[_data.achievementData.Count - 1].description;
     }
@@ -551,7 +551,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
     public void CheckCompleteAllAchivements(AchievementTemplate data, List<Image> trophyImages, TextMeshProUGUI progressText, TextMeshProUGUI descriptionText, TextMeshProUGUI coinText)
@@ -597,7 +597,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 
@@ -642,7 +642,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
     public void ChangeTrainingBadgeAchievements(AchievementTemplate data, bool badgeChange, List<Image> trophyImages, TextMeshProUGUI progressText, TextMeshProUGUI descriptionText, TextMeshProUGUI coinText)
@@ -686,7 +686,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
     public void CheckAchievements(AchievementTemplate data, int performedExercises, AchievementType type, List<Image> trophyImages, TextMeshProUGUI progressText, TextMeshProUGUI descriptionText, TextMeshProUGUI coinText)
@@ -739,7 +739,7 @@ public class userSessionManager : GenericSingletonClass<userSessionManager>
         {
             progressText.gameObject.SetActive(false);
             coinText.transform.parent.gameObject.SetActive(false);
-            descriptionText.text = "Congratulations! You've reached peak performance – keep the momentum going!";
+            descriptionText.text = "Congratulations! You've reached peak performance ï¿½ keep the momentum going!";
         }
     }
 

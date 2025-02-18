@@ -1083,7 +1083,7 @@ MonoBehaviour:
   lightPlaceholder: {r: 0, g: 0, b: 0, a: 0}
   darkInputFieldColor: {r: 0, g: 0, b: 0, a: 0}
   lightInputFieldColor: {r: 0, g: 0, b: 0, a: 0}
-  darkLineColor: {r: 0, g: 0, b: 0, a: 0}
+  darkLineColor: {r: 0.36078432, g: 0.2901961, b: 0.10980392, a: 0.29803923}
   darkSwitchTextColor: {r: 0, g: 0, b: 0, a: 0}
   lightXPbutton: {r: 0, g: 0, b: 0, a: 0}
   darkXPbutton: {r: 0, g: 0, b: 0, a: 0}
@@ -1091,6 +1091,9 @@ MonoBehaviour:
     templeteName: Workout
     templeteNotes: 
     exerciseTemplete: []
+    dateTimeOfPauseString: 
+    dateTimePaused: 0
+    elapsedTime: 0
 --- !u!4 &874479875
 Transform:
   m_ObjectHideFlags: 0
