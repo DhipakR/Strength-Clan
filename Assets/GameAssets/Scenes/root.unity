@@ -1091,6 +1091,9 @@ MonoBehaviour:
     templeteName: Workout
     templeteNotes: 
     exerciseTemplete: []
+    dateTimeOfPauseString: 
+    dateTimePaused: 0
+    elapsedTime: 0
 --- !u!4 &874479875
 Transform:
   m_ObjectHideFlags: 0
@@ -1978,7 +1981,7 @@ GameObject:
   - component: {fileID: 1984161162}
   m_Layer: 0
   m_Name: FirebaseManager
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

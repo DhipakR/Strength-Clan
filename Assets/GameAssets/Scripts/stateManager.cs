@@ -9,7 +9,7 @@ public class StateManager : GenericSingletonClass<StateManager>
     public GameObject footer;
     public bool isProcessing = false;
 
-    public void OpenStaticScreen(string folderPath, GameObject currentPage, string newPage, Dictionary<string, object> data, bool keepState = false, Action<object> callback = null,bool isfooter=false)
+    public void OpenStaticScreen(string folderPath, GameObject currentPage, string newPage, Dictionary<string, object> data, bool keepState = false, Action<object> callback = null,bool isfooter=false, int i = 0)
     {
         if (isProcessing) return;
         isProcessing = true;
@@ -23,7 +23,8 @@ public class StateManager : GenericSingletonClass<StateManager>
         var prefabResource = Resources.Load<GameObject>(prefabPath);
         var prefab = Instantiate(prefabResource);
         var container = GameObject.FindGameObjectWithTag(newPage);
-        container.transform.SetSiblingIndex(container.transform.parent.childCount - 2);
+        container.transform.SetSiblingIndex(container.transform.parent.childCount - (2 + i));
+        Debug.LogWarning($"({folderPath}) {container.transform.parent.childCount - (2 + i)}");
         prefab.transform.SetParent(container.transform, false);
         var mController = prefab.GetComponent<PageController>();
         mController.onInit(data, callback);

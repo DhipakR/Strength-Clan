@@ -22,7 +22,7 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
     public DefaultTempleteModel templeteModel;
     public List<WorkoutLogSubItem> workoutLogSubItems;
     //InputFieldManager inputFieldManager;
-
+    private bool interruptedLoading;
     private void Start()
     {
         exerciseNotes.transform.GetComponentInChildren<Button>().onClick.AddListener(() => userSessionManager.Instance.ActiveInput(exerciseNotes));
@@ -34,6 +34,8 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         this.exerciseTypeModel = (ExerciseTypeModel)data["data"];
         isWorkoutLog = (bool)data["isWorkoutLog"];
         isTemplateCreator = (bool)data["isTemplateCreator"];
+        interruptedLoading = data.TryGetValue("interruptedLoading", out var value) ? (bool)value : false;
+
         //if (data.ContainsKey("templeteModel"))
         {
             templeteModel = (DefaultTempleteModel)data["templeteModel"];
@@ -83,7 +85,7 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         //if (isTemplateCreator) threeDots.gameObject.SetActive(true);
         //else threeDots.gameObject.SetActive(false);
         exerciseNotes.text = this.exerciseTypeModel.exerciseNotes;
-        exerciseNotes.onEndEdit.AddListener(OnExerciseNotesChange);
+        exerciseNotes.onEndEdit.AddListener(OnExerciseNotesChange); 
     }
     private void AddSetFromModel(ExerciseModel exerciseModel)
     {
@@ -117,7 +119,8 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         { "data", exerciseModel },
         {"exerciseType", exerciseTypeModel.exerciseType },
         {"exerciseHistory", history },
-        {"isWorkoutLog", isWorkoutLog }
+        {"isWorkoutLog", isWorkoutLog },
+        {"interruptedLoading", interruptedLoading }
         };
 
         newSubItemScript.onInit(initData, callback);
