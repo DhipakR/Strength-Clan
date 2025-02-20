@@ -1081,9 +1081,10 @@ MonoBehaviour:
   lightButtonColor: {r: 0, g: 0, b: 0, a: 0}
   darkPlaceholder: {r: 0, g: 0, b: 0, a: 0}
   lightPlaceholder: {r: 0, g: 0, b: 0, a: 0}
+  lineColor: {r: 0, g: 0, b: 0, a: 0}
   darkInputFieldColor: {r: 0, g: 0, b: 0, a: 0}
   lightInputFieldColor: {r: 0, g: 0, b: 0, a: 0}
-  darkLineColor: {r: 0.36078432, g: 0.2901961, b: 0.10980392, a: 0.29803923}
+  darkLineColor: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 0.7019608}
   darkSwitchTextColor: {r: 0, g: 0, b: 0, a: 0}
   lightXPbutton: {r: 0, g: 0, b: 0, a: 0}
   darkXPbutton: {r: 0, g: 0, b: 0, a: 0}
