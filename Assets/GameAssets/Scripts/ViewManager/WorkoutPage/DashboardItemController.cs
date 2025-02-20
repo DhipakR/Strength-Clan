@@ -54,7 +54,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
             firstImage.preserveAspect = true; // Preserve aspect ratio if needed
 
             // Load sprite from Resources folder and assign to the first image
-            Sprite firstSprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/circle"); // Adjust the path
+            Sprite firstSprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/Circle 2"); // Adjust the path
             firstImage.sprite = firstSprite;
             firstImage.color = new Color32(236,229, 210, 255);
 
@@ -98,6 +98,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
             // Load sprite from Resources and assign to the second image
             overlayImage.sprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/profile circle/profile overlay"); ;
             overlayImage.color= new Color32(249, 249, 241, 255);
+            overlayImage.enabled = false;
 
             // Set width and height for the second image
             RectTransform overlayRectTransform = overlay.GetComponent<RectTransform>();
