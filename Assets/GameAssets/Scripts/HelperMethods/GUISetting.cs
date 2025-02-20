@@ -89,7 +89,7 @@ public class GUISetting : MonoBehaviour
                 SetDropdowns(userSessionManager.Instance.lightPrimaryFontBold, userSessionManager.Instance.lightButtonTextColor, userSessionManager.Instance.lightPlaceholder,Color.white);
                 SetOutlines(userSessionManager.Instance.lightButtonColor);
                 SetWorkoutLogDropdownToggle(userSessionManager.Instance.lightInputFieldColor);
-                SetLineColor(userSessionManager.Instance.lightPlaceholder);
+                SetLineColor(userSessionManager.Instance.lineColor);
                 SetSwitchColor(Color.white,userSessionManager.Instance.lightPlaceholder);
                 SetAchievementText(userSessionManager.Instance.lightSecondaryFont, Color.white);
                 break;
@@ -117,7 +117,7 @@ public class GUISetting : MonoBehaviour
                 SetDropdowns(userSessionManager.Instance.darkPrimaryFont, new Color32(255, 255, 255, 255), userSessionManager.Instance.darkPlaceholder,userSessionManager.Instance.darkInputFieldColor);
                 SetOutlines(userSessionManager.Instance.darkButtonColor);
                 SetWorkoutLogDropdownToggle(userSessionManager.Instance.darkInputFieldColor);
-                SetLineColor(userSessionManager.Instance.darkLineColor);
+                SetLineColor(userSessionManager.Instance.lineColor);
                 SetSwitchColor(userSessionManager.Instance.darkButtonTextColor, userSessionManager.Instance.darkSwitchTextColor);
                 SetAchievementText(userSessionManager.Instance.darkSecondaryFont, new Color32(226, 136, 0, 255));
                 break;

@@ -46,6 +46,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
             // Create the first GameObject (Image with mask)
             GameObject firstImageObject = new GameObject($"Image_{exerciseData.name}");
             firstImageObject.transform.SetParent(mainParentObject.transform, false); // Set it as a child of the main parent
+            firstImageObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
             // Add Image component to the first GameObject
             Image firstImage = firstImageObject.AddComponent<Image>();
