@@ -6,51 +6,122 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
+public class Badge
+{
+    public Sprite icon;
+    public string title;
+    public string description;
+}
+
 public class BadgeController : MonoBehaviour,PageController
 {
-    public Button continuButton;
-    public Button backButton;
-    [SerializeField]
-    private string currentBadge;
-    bool firstTime = false;
+    [SerializeField] private List<Badge> badges;
+    [SerializeField] private Image badgeIcon;
+    [SerializeField] private TMP_Text badgeTitle;
+    [SerializeField] private TMP_Text badgeDescription;
+    [SerializeField] private Button leftButton;
+    [SerializeField] private Button rightButton;
+    [SerializeField] private Button continuButton;
+    [SerializeField] private Button backButton;
+    private int currentIndex = 0;
+    private Vector2 startTouchPosition;
+    private Vector2 endTouchPosition;
+    bool firstTime;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
-        if (data.ContainsKey("firstTime"))
+        StateManager.Instance.ShiftStep(AccountCreationStep.Badge);
+
+        try
         {
-            firstTime = true;
-            backButton.gameObject.SetActive(false);
+            firstTime = (bool)data["data"];
+        }
+        catch { }
+        continuButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
+        continuButton.onClick.AddListener(Continu);
+        if (firstTime)
+        {
+            backButton.onClick.AddListener(() => StateManager.Instance.Backer(gameObject));
         }
         else
         {
-            backButton.gameObject.SetActive(true);
-            backButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
-            backButton.onClick.AddListener(Back);
-        }
-        continuButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
-        continuButton.onClick.AddListener(Continu);
+            backButton.onClick.AddListener(() => StateManager.Instance.HandleBackAction(gameObject));
+        }        // leftButton.onClick.AddListener(() => ChangeBadge(-1));
+        // rightButton.onClick.AddListener(() => ChangeBadge(1));
+
+        UpdateBadgeDisplay();
+    }
+    private void UpdateBadgeDisplay()
+    {
+        badgeIcon.sprite = badges[currentIndex].icon;
+        badgeTitle.text = badges[currentIndex].title;
+        badgeDescription.text = badges[currentIndex].description;
+    }
+    private void ChangeBadge(int direction)
+    {
+        currentIndex += direction;
+        if (currentIndex < 0)
+            currentIndex = badges.Count - 1;
+        else if (currentIndex >= badges.Count)
+            currentIndex = 0;
+
+        UpdateBadgeDisplay();
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)&&!firstTime)
-        {
-            Back();
-        }
+        DetectSwipe();
     }
-    public void SetBadge(string badge)
+    private void DetectSwipe()
     {
-        currentBadge = badge.Replace(" ","");
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+            if (touch.phase == TouchPhase.Began)
+                startTouchPosition = touch.position;
+            else if (touch.phase == TouchPhase.Ended)
+            {
+                endTouchPosition = touch.position;
+                float swipeDistance = endTouchPosition.x - startTouchPosition.x;
+
+                if (Mathf.Abs(swipeDistance) > Screen.width * 0.1f) // Sensitivity
+                {
+                    if (swipeDistance > 0)
+                        ChangeBadge(-1); // Swipe Right
+                    else
+                        ChangeBadge(1);  // Swipe Left
+                }
+            }
+        }
     }
     public void Continu()
     {
-        StartCoroutine(SetBadgeName(currentBadge));
-        //ApiDataHandler.Instance.SetBadgeNameToFirebase(currentBadge);
-        //Back();
+        StartCoroutine(SetBadgeName(badges[currentIndex].title.Replace(" ", "")));
     }
     public void Back()
     {
         StateManager.Instance.HandleBackAction(gameObject);
         StateManager.Instance.OpenFooter(null,null,false);
     }
+
+    public IEnumerator SetBadgeName(string name)
+    {
+        ApiDataHandler.Instance.isSignUp = true;
+        GlobalAnimator.Instance.FadeInLoader();
+        string path = $"users/{FirebaseManager.Instance.user.UserId}/BadgeName/";
+        var dataTask = FirebaseDatabase.DefaultInstance.RootReference.Child(path).SetValueAsync(name);
+
+        yield return new WaitUntil(() => dataTask.IsCompleted);
+
+        if (dataTask.Exception != null)
+            Debug.LogError("Error while saving badge: " + dataTask.Exception);
+        else
+            userSessionManager.Instance.badgeName = name;
+
+        GlobalAnimator.Instance.FadeOutLoader();
+        StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+    }
+
+    /*
     public IEnumerator SetBadgeName(string name)
     {
         ApiDataHandler.Instance.isSignUp = true;
@@ -75,9 +146,11 @@ public class BadgeController : MonoBehaviour,PageController
             userSessionManager.Instance.badgeName = name;
         }
         GlobalAnimator.Instance.FadeOutLoader();
+        StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+
         if (firstTime)
         {
-            StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+                StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
         }
         else
         {
@@ -85,6 +158,7 @@ public class BadgeController : MonoBehaviour,PageController
             userSessionManager.Instance.CheckAchievementStatus();
             Back();
         }
-
-    }
+        
+       }
+    */
 }

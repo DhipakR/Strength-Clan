@@ -3,6 +3,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System;
+using UnityEngine.EventSystems;
 
 public class DashboardItemController : MonoBehaviour, ItemController
 {
@@ -157,9 +158,13 @@ public class DashboardItemController : MonoBehaviour, ItemController
     }
     public void PlayButton()
     {
-        callback?.Invoke(defaultTempleteModel);
-        AudioController.Instance.OnButtonClick();
-        StateManager.Instance.CloseFooter();
+        // Ensure the callback is only invoked when the playButton is clicked
+        if (EventSystem.current.currentSelectedGameObject == playButton.gameObject)
+        {
+            callback?.Invoke(defaultTempleteModel);
+            AudioController.Instance.OnButtonClick();
+            StateManager.Instance.CloseFooter();
+        }
     }
     //public void EditWorkoutName()
     //{

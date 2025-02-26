@@ -581,6 +581,13 @@ public class WorkoutLogController : MonoBehaviour, PageController
 
     public void OnBack()
     {
+        SaveWorkoutData();
+        StateManager.Instance.HandleBackAction(gameObject);
+        StateManager.Instance.OpenFooter(null, null, false);
+        StateManager.Instance.SetSpecificFooterButton(FooterButtons.History);
+    }
+    public void OnClose()
+    {
         DeleteSavedWorkout();
         //OnToggleWorkout(null);
         //StateManager.Instance.HandleBackAction(gameObject);

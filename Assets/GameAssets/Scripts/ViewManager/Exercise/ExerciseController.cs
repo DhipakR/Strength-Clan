@@ -63,12 +63,10 @@ public class ExerciseController : MonoBehaviour, PageController
         addExerciseButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
         bodyPartButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
         searchInputField.onValueChanged.AddListener(OnSearchChanged);
-
-
-       
+        StateManager.Instance.CheckTutorial("tutorial", "Choose a single exercise or multiple from our extensive list or create a custom exercise from <b>+</b> sign button!", 3);
     }
 
-private void OnEnable()
+    private void OnEnable()
 {
     // Clear any existing list items
     foreach (Transform child in content)

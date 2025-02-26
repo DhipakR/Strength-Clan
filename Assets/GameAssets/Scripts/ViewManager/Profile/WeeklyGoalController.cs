@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,13 +14,19 @@ public class WeeklyGoalController : MonoBehaviour, PageController
     public TextMeshProUGUI messageText;
     public Button continueButton;
     public Button infoButton;
-    bool firstTime;
     TextMeshProUGUI goalText = null;
+    public Button backButton;
+    bool firstTime;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
-        print("oninit");
-        firstTime = (bool)data["data"];
-        if (data.ContainsKey("text"))
+        StateManager.Instance.ShiftStep(AccountCreationStep.WeeklyGoal);
+
+        firstTime = true;
+        if (data != null)
+        {
+            firstTime = (bool)data["data"];
+        }
+        if (data != null && data.ContainsKey("text"))
         {
             goalText = (TextMeshProUGUI)data["text"];
         }
@@ -28,6 +35,15 @@ public class WeeklyGoalController : MonoBehaviour, PageController
         //dropDown.gameObject.AddComponent<Button>();
         //dropDown.gameObject.GetComponent<Button>().onClick.AddListener(AudioController.Instance.OnButtonClick);
         infoButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
+        if (firstTime)
+        {
+            backButton.onClick.AddListener(() => StateManager.Instance.Backer(gameObject));
+        }
+        else
+        {
+            backButton.gameObject.SetActive(true);
+            backButton.onClick.AddListener(() => StateManager.Instance.HandleBackAction(gameObject));
+        }
     }
     public void OnDropdownClick()
     {
@@ -39,15 +55,11 @@ public class WeeklyGoalController : MonoBehaviour, PageController
         ApiDataHandler.Instance.WeeklyGoalSetDate(DateTime.Now);
         ApiDataHandler.Instance.SetCurrentWeekStartDate(DateTime.Now);
         if (goalText != null) { goalText.text = userSessionManager.Instance.weeklyGoal.ToString(); }
+        PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" /*+ userSessionManager.Instance.mProfileUsername*/, false);
+        //userSessionManager.Instance.AddGymVisit();
         if (firstTime)
         {
-            PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" /*+ userSessionManager.Instance.mProfileUsername*/, false);
-            Dictionary<string, object> mData = new Dictionary<string, object>
-            {
-                { "isFirstTime", true }
-            };
-            StateManager.Instance.OpenStaticScreen("weight", gameObject, "weightScreen", mData);
-            //userSessionManager.Instance.AddGymVisit();
+            StateManager.Instance.OpenStaticScreen("weight", gameObject, "weightScreen", null);
         }
         else
         {

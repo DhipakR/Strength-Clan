@@ -54,6 +54,10 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
             rpe.value = exerciseModel.rpe;
             isComplete.isOn = exerciseModel.toggle;
             timerText.text = FormatTime(exerciseModel.time.ToString());
+            if (exerciseModel.toggle)
+            {
+                OnToggleValueChange(true, false);
+            }
         }
         else
         {
@@ -407,6 +411,27 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
         //    isComplete.targetGraphic.color = new Color32(255, 182, 193, 255);
 
         //}
+    }
+
+    public void OnToggleValueChange(bool value, bool playSound = true)
+    {
+        exerciseModel.toggle = value;
+
+        if (value)
+        {
+            if (playSound)
+            {
+                AudioController.Instance.OnSetComplete();
+            }
+
+            isComplete.targetGraphic.color = new Color32(255, 182, 193, 255);
+            setBg.color = new Color32(255, 127, 127, 255);
+        }
+        else
+        {
+            isComplete.targetGraphic.color = new Color32(246, 236, 220, 255);
+            setBg.color = Color.white;
+        }
     }
 
     public void OnToggleValueChange(bool value)

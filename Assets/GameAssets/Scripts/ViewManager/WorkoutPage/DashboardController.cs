@@ -29,14 +29,17 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
         workout.onClick.AddListener(AudioController.Instance.OnButtonClick);
         split.onClick.AddListener(AudioController.Instance.OnButtonClick);
         StreakAndCharacterManager.Instance.UpdateStreak();
-
-        CheckSavedOngoingWorkout();
+        bool interruptCheck = StateManager.Instance.CheckTutorial("tutorial", "Press <b>+</b> sign button to create a new workout session template!", 1);
+        if (interruptCheck)
+        {
+            CheckSavedOngoingWorkout();
+        }
     }
     private void CheckSavedOngoingWorkout()
     {
         if (PlayerPrefs.HasKey("SavedOngoingWorkout"))
         {
-            List<object> initialData = new List<object> { this.gameObject };
+            List<object> initialData = new List<object> { "continue", this.gameObject };
             Action<List<object>> onFinish = (data) => { };
             PopupController.Instance.OpenPopup("workoutLog", "ContinueWorkoutPopup", onFinish, initialData);
         }
@@ -78,6 +81,7 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
     }
     public void StartEmptyWorkout()
     {
+        CheckSavedOngoingWorkout();
         DefaultTempleteModel exercise = new();
         exercise.templeteName="Workout " + content.childCount.ToString();
         Dictionary<string, object> mData = new Dictionary<string, object>
@@ -124,6 +128,7 @@ public class DashboardController : MonoBehaviour, PageController, IBeginDragHand
     }
     public void StartEmptyWorkoutWithTemplate(object exercise)
     {
+        CheckSavedOngoingWorkout();
         Dictionary<string, object> mData = new Dictionary<string, object>
         {
             { "isTemplateCreator", false },

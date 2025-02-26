@@ -11,16 +11,13 @@ public class WeightController : MonoBehaviour,PageController
     public TMP_InputField weightInput;
     public TMP_Dropdown dropdown;
     public TextMeshProUGUI messageText;
-    public Button backButton;
     public WeightUnit weightUnit;
-    bool isFirstTime;
+    public Button backButton;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
-        isFirstTime = (bool)data["isFirstTime"];
-        if (isFirstTime)
-            backButton.gameObject.SetActive(false);
-        else
-            backButton.gameObject.SetActive(true);
+        backButton.onClick.AddListener(() => StateManager.Instance.Backer());
+        StateManager.Instance.ShiftStep(AccountCreationStep.Weight);
+
     }
     private void Start()
     {
@@ -35,8 +32,6 @@ public class WeightController : MonoBehaviour,PageController
                 break;
         }
         weightInput.onValueChanged.AddListener(LimitInput);
-        backButton.onClick.AddListener(Back);
-        backButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
     }
     void LimitInput(string input)
     {
@@ -115,14 +110,7 @@ public class WeightController : MonoBehaviour,PageController
         if (save)
         {
             ApiDataHandler.Instance.SetWeightUnit((int)weightUnit);
-            if (isFirstTime){
-                Dictionary<string, object> mData = new Dictionary<string, object>
-                {
-                 };
-                StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", mData);
-            }
-            else
-                Back();
+            StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", null);
         }
         else
         {
@@ -137,10 +125,6 @@ public class WeightController : MonoBehaviour,PageController
             }
             //GlobalAnimator.Instance.ShowTextMessage(messageText, "Weight must be between 10kg / 22lbs to 150kg / 331lbs", 2);
         }
-    }
-    public void Back()
-    {
-        StateManager.Instance.HandleBackAction(gameObject);
     }
 
 }

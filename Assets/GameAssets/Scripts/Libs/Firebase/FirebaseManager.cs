@@ -73,39 +73,13 @@ public class FirebaseManager : GenericSingletonClass<FirebaseManager>
          EmailAuthProvider.GetCredential(email, password);
         auth.SignInAndRetrieveDataWithCredentialAsync(credential).ContinueWithOnMainThread(task =>
         {
-            print("in");
-            print("in");
-            print("in");
-            print("in");
-            print("in");
-            print("in");
-            print("in");
-            print("in");
-            print("in");
 
             if (task.IsCanceled || task.IsFaulted)
             {
-                print("if");
-                print("if");
-                print("if");
-                print("if");
-                print("if");
-                print("if");
-                print("if");
-                print("if");
-                print("if");
                 onFailure?.Invoke(task.Exception.GetBaseException() as FirebaseException);
             }
             else
             {
-                print("else");
-                print("else");
-                print("else");
-                print("else");
-                print("else");
-                print("else");
-                print("else");
-                print("else");
                 user = task.Result.User;
                 //OnSaveUser(email, password);
                 string username = HelperMethods.Instance.ExtractUsernameFromEmail(email);

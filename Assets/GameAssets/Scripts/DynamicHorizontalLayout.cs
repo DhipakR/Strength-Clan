@@ -81,7 +81,7 @@ public class DynamicHorizontalLayout : MonoBehaviour
             Image image = transform.GetChild(i).GetComponent<Image>();
             if (i == index)
             {
-                FindAnyObjectByType<BadgeController>().SetBadge(image.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text);
+                // FindAnyObjectByType<BadgeController>().SetBadge(image.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text);
                 //image.color = new Color32(255, 171, 0, 255);
                 //UpdateWeightData(textComponent.text);
                 image.transform.GetChild(0).gameObject.SetActive(true);

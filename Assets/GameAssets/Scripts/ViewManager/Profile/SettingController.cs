@@ -127,15 +127,17 @@ public class SettingController : MonoBehaviour, PageController
     public void ChangeBadge()
     {
         //PopupController.Instance.OpenPopup("profile", "ChangeBadgePopup", null, null);
-        StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", null, true);
+        Dictionary<string, object> mData = new Dictionary<string, object> { { "data", false } };
+        StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", mData, true);
     }
+    public bool testing = false;
     public void ChangeWeeklyGoal()
     {
         AudioController.Instance.OnButtonClick();
         DateTime now = DateTime.Now;
         //print(now + "    " + ApiDataHandler.Instance.GetCurrentWeekStartDate());
         TimeSpan timeDifference = now - userSessionManager.Instance.weeklyGoalSetDate;
-        if (timeDifference.TotalDays >= 14 || userSessionManager.Instance.weeklyGoal == 0)
+        if (testing || timeDifference.TotalDays >= 14 || userSessionManager.Instance.weeklyGoal == 0)
         {
             Dictionary<string, object> mData = new Dictionary<string, object> { { "data", false } };
             StateManager.Instance.OpenStaticScreen("profile", gameObject, "weeklyGoalScreen", mData, true);

@@ -8,9 +8,12 @@ using System.Collections;
 using Firebase;
 using Firebase.Auth;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
 
 public class AuthController : MonoBehaviour, PageController
 {
+
+    public Button backButton;
 
     [Header("Utilities")]
     public TMP_Text aError;
@@ -32,7 +35,6 @@ public class AuthController : MonoBehaviour, PageController
 
     private string mAuthType;
 
-
     public GoogleAuth GoogleAuth;
     public Text Log;
     public Text Output;
@@ -41,6 +43,7 @@ public class AuthController : MonoBehaviour, PageController
     public void onInit(Dictionary<string, object> pData, Action<object> callback)
     {
         this.mAuthType = (string)pData.GetValueOrDefault(AuthKey.sAuthType, AuthConstant.sAuthTypeSignup);
+        print("BRUH " + mAuthType);
         if (this.mAuthType == AuthConstant.sAuthTypeLogin)
         {
             aHeading.text = "login";
@@ -49,12 +52,13 @@ public class AuthController : MonoBehaviour, PageController
             aPageToggleText2.text = "Create an account.";
             aForgetPassword.SetActive(true);
             aReEnterPassword.gameObject.SetActive(false);
-            ChangeYPosition(aError.gameObject.GetComponent<RectTransform>(), -20);
-            ChangeYPosition(aLineDevider, -85f);
-            ChangeYPosition(togglePage, -511f);
-            ChangeYPosition(contnueButton, -588f);
+            ChangeYPosition(aLineDevider, -185f);
+            ChangeYPosition(togglePage, -615f);
+            ChangeYPosition(contnueButton, -698f);
             ChangeYPosition(agoogle, -86.6f);
             ChangeYPosition(aApple, -168.3f);
+            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -50);
+            backButton.gameObject.SetActive(false);
         }
         else if (this.mAuthType == AuthConstant.sAuthTypeSignup)
         {
@@ -64,18 +68,17 @@ public class AuthController : MonoBehaviour, PageController
             aPageToggleText2.text = "Log In";
             aForgetPassword.SetActive(false);
             aReEnterPassword.gameObject.SetActive(true);
-            ChangeYPosition(aError.gameObject.GetComponent<RectTransform>(), -105f);
-            ChangeYPosition(aLineDevider, -130f);
-            ChangeYPosition(togglePage, -555f);
-            ChangeYPosition(contnueButton, -634f);
+            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -100);
+            ChangeYPosition(aLineDevider, -185f);
+            togglePage.gameObject.SetActive(false);
+            ChangeYPosition(contnueButton, -698f);
             ChangeYPosition(agoogle, -138);
             ChangeYPosition(aApple, -220);
             aPageToggleText1.gameObject.SetActive(false);
             aPageToggleText2.gameObject.SetActive(false);
+            backButton.gameObject.SetActive(true);
 
         }
-
-
         StartCoroutine(prelaodAssets());
         userSessionManager.Instance.mSidebar = false;
         aUsername.text = "";
@@ -86,7 +89,10 @@ public class AuthController : MonoBehaviour, PageController
     }
     public void Start()
     {
-
+    }
+    public void Backer()
+    {
+        StateManager.Instance.Backer(gameObject);
     }
 
     IEnumerator prelaodAssets()
@@ -232,6 +238,7 @@ public class AuthController : MonoBehaviour, PageController
 
 
     }
+
     public void CheckUserNameSet()
     {
         print("check userName");
@@ -255,8 +262,7 @@ public class AuthController : MonoBehaviour, PageController
             else
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                Dictionary<string, object> mData = new Dictionary<string, object> { { "data", true } };
-                StateManager.Instance.OpenStaticScreen("userName", gameObject, "userNameScreen", mData);
+                StateManager.Instance.OpenStaticScreen("userName", gameObject, "userNameScreen", null);
             }
         });
     }
@@ -284,10 +290,11 @@ public class AuthController : MonoBehaviour, PageController
             else
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                Dictionary<string, object> mData = new Dictionary<string, object> { { "data", true } };
-                StateManager.Instance.OpenStaticScreen("profile", gameObject, "weeklyGoalScreen", mData);
+                StateManager.Instance.ShiftStep(AccountCreationStep.WeeklyGoal);
+                StateManager.Instance.OpenStaticScreen("profile", gameObject, "weeklyGoalScreen", null);
             }
         });
+
     }
     public void CheckWeightSet()
     {
@@ -302,20 +309,20 @@ public class AuthController : MonoBehaviour, PageController
                     {
                         string stringWeight = data.Value.ToString();
                         float weight = float.Parse(stringWeight);
-                        Debug.Log("seted weight: " + weight);
-                        CheckJoingDateSet();
+                        Debug.Log("setted weight: " + weight);
+                        CheckJoiningDateSet();
                     }
                 });
             }
             else
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                Dictionary<string, object> mData = new Dictionary<string, object> { { "isFirstTime", true } };
-                StateManager.Instance.OpenStaticScreen("weight", gameObject, "weightScreen", mData);
+                StateManager.Instance.ShiftStep(AccountCreationStep.Weight);
+                StateManager.Instance.OpenStaticScreen("weight", gameObject, "weightScreen", null);
             }
         });
     }
-    public void CheckJoingDateSet()
+    public void CheckJoiningDateSet()
     {
         print("check joining date");
         FirebaseManager.Instance.CheckIfLocationExists("/users/" + FirebaseManager.Instance.user.UserId + "/joiningDate", result =>
@@ -336,12 +343,11 @@ public class AuthController : MonoBehaviour, PageController
             else
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                Dictionary<string, object> mData = new Dictionary<string, object>
-                {
-                };
-                StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", mData);
+                StateManager.Instance.ShiftStep(AccountCreationStep.JoiningDate);
+                StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", null);
             }
         });
+
     }
     public void CheckBadgeNameSet()
     {
@@ -365,9 +371,10 @@ public class AuthController : MonoBehaviour, PageController
             else
             {
                 GlobalAnimator.Instance.FadeOutLoader();
-                StateManager.Instance.OpenStaticScreen("date", gameObject, "DateScreen", null);
+                StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", null);
             }
         });
+        StateManager.Instance.ShiftStep(AccountCreationStep.Badge);
     }
     void ChangeYPosition(RectTransform rectTransform, float yPos)
     {
@@ -385,8 +392,6 @@ public class AuthController : MonoBehaviour, PageController
     {
         Application.OpenURL("");
     }
-
-
 
     public async void OnTrigger()
     {
@@ -438,6 +443,25 @@ public class AuthController : MonoBehaviour, PageController
         }
         else if (this.mAuthType == AuthConstant.sAuthTypeSignup)
         {
+            string checkThis = aUsername.text.ToLower();
+            if (string.IsNullOrEmpty(checkThis))
+            {
+                aError.text = "Email is required";
+                aError.gameObject.SetActive(true);
+                return;
+            }
+            else if (!checkThis.Contains("@gmail.com"))
+            {
+                aError.text = "Email invalid domain";
+                aError.gameObject.SetActive(true);
+                return;
+            }
+            else if (checkThis.Length <= 10)
+            {
+                aError.text = "Email invalid length";
+                aError.gameObject.SetActive(true);
+                return;
+            }
             if (aPassword.text.Length < 6)
             {
                 aError.text = "Password must be 6 characters or longer";
@@ -446,41 +470,33 @@ public class AuthController : MonoBehaviour, PageController
             }
             else if (aPassword.text != aReEnterPassword.text)
             {
-                aError.text = "Password does't match";
+                aError.text = "Password doesn't match";
                 aError.gameObject.SetActive(true);
                 return;
             }
-            else if (aUsername.text != "")
+            else
             {
-                if (aUsername.text.Contains("@gmail.com") && aUsername.text.Length > 10)
-                {
-                    bool emailExists = await CheckEmailAlreadyInUse(aUsername.text, aPassword.text);
-                    if (emailExists)
-                    {
-                        aError.text = "Email already in use";
-                        aError.gameObject.SetActive(true);
-                        return;
-                    }
-                }
-                else
-                {
-                    aError.text = "Email not valid";
-                    aError.gameObject.SetActive(true);
-                    return;
-                }
+                aError.text = "";
+                aError.gameObject.SetActive(false);
             }
-            else if (aUsername.text == "")
+
+            bool emailExists = await CheckEmailAlreadyInUse(aUsername.text, aPassword.text);
+            if (emailExists)
             {
-                aError.text = "Email not valid";
+                aError.text = "Email already in use";
                 aError.gameObject.SetActive(true);
                 return;
+            }
+            else
+            {
+                aError.text = "";
+                aError.gameObject.SetActive(false);
             }
 
             Action callbackSuccess = () =>
             {
                 GlobalAnimator.Instance.FadeOutLoader();
 
-                print("true");
                 //PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_" + userSessionManager.Instance.mProfileUsername, true);
                 GameObject alertPrefab = Resources.Load<GameObject>("Prefabs/alerts/alertSuccess");
                 GameObject alertsContainer = GameObject.FindGameObjectWithTag("alerts");
@@ -502,6 +518,7 @@ public class AuthController : MonoBehaviour, PageController
                 //GlobalAnimator.Instance.FadeOutLoader();
                 //GlobalAnimator.Instance.FadeIn(aError.gameObject);
                 //aError.text = ErrorManager.Instance.getTranslateError(pError.Error.ToString());
+                print(2);
                 GlobalAnimator.Instance.FadeOutLoader();
                 GlobalAnimator.Instance.FadeIn(aError.gameObject);
                 var errorMessage = pError.InnerException != null
@@ -513,6 +530,7 @@ public class AuthController : MonoBehaviour, PageController
             GlobalAnimator.Instance.FadeInLoader();
             FirebaseManager.Instance.OnTryRegisterNewAccount(this.aUsername.text, this.aPassword.text, callbackSuccess, callbackFailure);
         }
+
     }
     public async Task<bool> CheckEmailAlreadyInUse(string email, string password)
     {
@@ -579,15 +597,7 @@ public class AuthController : MonoBehaviour, PageController
         GlobalAnimator.Instance.FadeInLoader();
         FirebaseManager.Instance.OnTryPasswordReset(aUsername.text, callbackSuccess, callbackFailure);
 
-
-
-
-
-
-
-
     }
-
 
 
     public void OnSignGmail()

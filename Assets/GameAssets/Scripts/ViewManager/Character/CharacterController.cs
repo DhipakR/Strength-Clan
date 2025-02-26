@@ -22,9 +22,22 @@ public class CharacterController : MonoBehaviour, PageController
     public SkeletonDataAsset[] characterSkeletonDataVer1;
     public SkeletonDataAsset[] characterSkeletonDataVer2;
     private string animName = "";
+    private bool glitchfixdone = false;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
+        print(000);
+        // Set the alpha to 0 to hide the skeleton initially
+        if (characterSkeletonGraphic != null && !glitchfixdone)
+        {
+            print(111);
+            Color skeletonColor = characterSkeletonGraphic.color;
+            skeletonColor.a = 0f; // Set alpha to 0
+            characterSkeletonGraphic.color = skeletonColor;
+            glitchfixdone = true;
+        }
+
         levelText.GetComponent<Button>().onClick.AddListener(LevelDetailPopup);
+        UpdateCharacterView();
     }
     private void Start()
     {
@@ -39,12 +52,12 @@ public class CharacterController : MonoBehaviour, PageController
         rightButton.onClick.AddListener(OnRightButtonPressed);
         leftButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
         rightButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
+        StateManager.Instance.CheckTutorial("tutorial", "Click level to know about the leveling system!", 5);
     }
     private void OnEnable()
     {
         coinText.text = userSessionManager.Instance.currentCoins.ToString();
         currentSide = CharacterSide.Front;
-        UpdateCharacterView();
     }
 
     public void ShopeButtonClick()
@@ -226,6 +239,36 @@ public class CharacterController : MonoBehaviour, PageController
                 break;
         }
         SetAnimation(characterSkeletonGraphic, animName, true);
+
+        StartCoroutine(SetAlphaGradually(characterSkeletonGraphic, 1f, 0.25f, 0.25f));
+    }
+    private IEnumerator SetAlphaGradually(SkeletonGraphic skeletonGraphic, float targetAlpha, float delay, float duration)
+    {
+        // Wait for the initial delay
+        yield return new WaitForSeconds(delay);
+
+        if (skeletonGraphic != null)
+        {
+            float startAlpha = skeletonGraphic.color.a;
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                elapsedTime += Time.deltaTime;
+                float newAlpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / duration);
+
+                Color skeletonColor = skeletonGraphic.color;
+                skeletonColor.a = newAlpha;
+                skeletonGraphic.color = skeletonColor;
+
+                yield return null; // Wait for the next frame
+            }
+
+            // Ensure the final alpha is set
+            Color finalColor = skeletonGraphic.color;
+            finalColor.a = targetAlpha;
+            skeletonGraphic.color = finalColor;
+        }
     }
     private void LoadSpriteFromFolder(string folderName)
     {

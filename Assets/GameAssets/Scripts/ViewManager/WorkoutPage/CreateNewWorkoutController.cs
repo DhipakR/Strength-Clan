@@ -68,6 +68,7 @@ public class CreateNewWorkoutController : MonoBehaviour,PageController
         addExercise.onClick.AddListener(() => AudioController.Instance.OnButtonClick());
         saveTemplate.onClick.AddListener(() => AudioController.Instance.OnButtonClick());
         backButton.onClick.AddListener(() => AudioController.Instance.OnButtonClick());
+        StateManager.Instance.CheckTutorial("tutorial", "Press <b>+</b> sign button to add single or multiple exercises to your workout session template!", 2);
     }
     private void Update()
     {

@@ -176,7 +176,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2898659439138738461}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -226,6 +226,8 @@ MonoBehaviour:
   continueButton: {fileID: 422622056015254300}
   cancelButton: {fileID: 2071439789645442852}
   fade: {fileID: 3390468500675645082}
+  title: {fileID: 9219972898353736324}
+  description: {fileID: 6273068544491086425}
 --- !u!1 &3124635634564169174
 GameObject:
   m_ObjectHideFlags: 0

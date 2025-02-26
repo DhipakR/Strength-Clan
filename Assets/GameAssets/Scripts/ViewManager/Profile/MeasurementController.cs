@@ -2,6 +2,8 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -64,7 +66,6 @@ public class MeasurementController : MonoBehaviour, PageController
                 weight.onEndEdit.AddListener(value => 
                 {
                     OnInputEditEnd(value, targetField: ref ApiDataHandler.Instance.getMeasurementData().weight, "lbs", weight, "weight");
-                    weight.text = Math.Round(ApiDataHandler.Instance.getMeasurementData().weight * 2.2f) + " lbs";
                 });
                 break;
         }
@@ -87,16 +88,37 @@ public class MeasurementController : MonoBehaviour, PageController
     // Initialize input fields with values from the MeasurementModel and add units
     void InitializeInputFields()
     {
-        switch ((WeightUnit)ApiDataHandler.Instance.GetWeightUnit())
+        // Get the current unit and saved unit
+        WeightUnit currentUnit = (WeightUnit)ApiDataHandler.Instance.GetWeightUnit();
+        WeightUnit savedUnit = ApiDataHandler.Instance.getMeasurementData().weightUnit;
+        print(currentUnit + "-" + savedUnit);
+        // Convert the weight if the saved unit differs from the current unit
+        if (savedUnit != currentUnit)
         {
-            case WeightUnit.kg:
-                weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " kg";
-                break;
-            case WeightUnit.lbs:
-                weight.text = Math.Round(ApiDataHandler.Instance.getMeasurementData().weight * 2.2f) + " lbs";
-                break;
+            if (currentUnit == WeightUnit.lbs)
+            {
+                // Convert from kg to lbs
+                ApiDataHandler.Instance.getMeasurementData().weight = (float)Math.Round(ApiDataHandler.Instance.getMeasurementData().weight * 2.2f);
+            }
+            else
+            {
+                // Convert from lbs to kg
+                ApiDataHandler.Instance.getMeasurementData().weight = (float)Math.Round(ApiDataHandler.Instance.getMeasurementData().weight / 2.2f);
+            }
+            ApiDataHandler.Instance.getMeasurementData().weightUnit = currentUnit; // Update the saved unit
         }
-        //weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " kg";
+
+        // Display the weight in the appropriate unit
+        if (currentUnit == WeightUnit.lbs)
+        {
+            weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " lbs";
+        }
+        else
+        {
+            weight.text = ApiDataHandler.Instance.getMeasurementData().weight + " kg";
+        }
+
+        // Initialize other fields
         bodyFat.text = ApiDataHandler.Instance.getMeasurementData().bodyFat + " %";
         chest.text = ApiDataHandler.Instance.getMeasurementData().chest + " cm";
         shoulder.text = ApiDataHandler.Instance.getMeasurementData().shoulder + " cm";
@@ -111,7 +133,6 @@ public class MeasurementController : MonoBehaviour, PageController
         leftCalf.text = ApiDataHandler.Instance.getMeasurementData().leftCalf + " cm";
         rightCalf.text = ApiDataHandler.Instance.getMeasurementData().rightCalf + " cm";
     }
-
     // Generic function to handle input editing and update the MeasurementModel
     public void OnInputEditEnd(string value, ref float targetField, string unit, TMP_InputField text, string name)
     {
@@ -120,10 +141,14 @@ public class MeasurementController : MonoBehaviour, PageController
 
         if (float.TryParse(cleanedValue, out float result))
         {
-            if (unit == "lbs" && name == "weight")
-                targetField = (float)Math.Round(result / 2.2f);
-            else
-                targetField = result;  // Update the corresponding field in the MeasurementModel
+            // Store the value directly (no conversion)
+            targetField = result;
+
+            // Save the current unit for weight
+            if (name == "weight")
+            {
+                ApiDataHandler.Instance.getMeasurementData().weightUnit = (WeightUnit)ApiDataHandler.Instance.GetWeightUnit();
+            }
         }
         else
         {
@@ -133,6 +158,7 @@ public class MeasurementController : MonoBehaviour, PageController
         // Update the input field to reflect the value with the unit
         UpdateInputFieldWithUnit(targetField, unit, text);
 
+        // Update history
         foreach (MeasurementHistoryItem item in historyItems)
         {
             if (item.name == name)
@@ -141,48 +167,36 @@ public class MeasurementController : MonoBehaviour, PageController
                 break;
             }
         }
-        MeasurementHistoryItem newItem = new MeasurementHistoryItem { name = name, dateTime = DateTime.Now.ToString("MMM dd, yyyy hh:mm tt"), value = result };
+        MeasurementHistoryItem newItem = new MeasurementHistoryItem { name = name, dateTime = DateTime.Now.ToString("MMM dd, yyyy hh:mm:ss tt"), value = result };
         historyItems.Add(newItem);
     }
 
     // Helper method to update the input field text with the value and unit
     private void UpdateInputFieldWithUnit(float value, string unit, TMP_InputField text)
     {
-        // Check which input field needs to be updated by comparing the original text value
-        if (unit.Contains("kg"))
-            text.text = value + " " + unit;
-        else if (unit.Contains("lbs"))
-            text.text = value + " lbs";
-        else if (unit.Contains("%"))
-            text.text = value + " %";
-        else if (unit.Contains("cm"))
-            text.text = value + " cm";
-    }
-    public void Save()
-    {
-        if (historyItems.Count > 0)
+        if (unit.Contains("kg") || unit.Contains("lbs"))
         {
-            int historyIndex = ApiDataHandler.Instance.getMeasurementHistory().measurmentHistory.Count;
-            ApiDataHandler.Instance.SaveMeasurementData();
-            foreach (MeasurementHistoryItem item in historyItems)
+            WeightUnit currentUnit = (WeightUnit)ApiDataHandler.Instance.GetWeightUnit();
+            if (currentUnit == WeightUnit.lbs)
             {
-                ApiDataHandler.Instance.SaveMeasurementHistory(item, historyIndex);
-                ApiDataHandler.Instance.SetMeasurementHistory(item);
-                historyIndex++;
+                text.text = value + " lbs"; // No conversion, display as pounds
             }
-            historyItems.Clear();
-            //ApiDataHandler.Instance.SaveMeasurementHistory();
-            DOTween.Kill(messageText);
-            GlobalAnimator.Instance.ShowTextMessage(messageText, "Saved Successfully!", 2);
+            else
+            {
+                text.text = value + " kg"; // No conversion, display as kilograms
+            }
         }
-        else
+        else if (unit.Contains("%"))
         {
-            DOTween.Kill(messageText);
-            GlobalAnimator.Instance.ShowTextMessage(messageText, "Nothing new to save!", 2);
+            text.text = value + " %";
         }
-        AudioController.Instance.OnButtonClick();
+        else if (unit.Contains("cm"))
+        {
+            text.text = value + " cm";
+        }
     }
-    public void OpenHistory(string name)
+
+    public void OpenHistory(string name)    
     {
         Dictionary<string, object> mData = new Dictionary<string, object>
         {
@@ -197,4 +211,88 @@ public class MeasurementController : MonoBehaviour, PageController
         //ApiDataHandler.Instance.LoadMeasurementData();
     }
 
+    public void Save()
+    {
+        // Check if any input field has changed
+        bool hasChanges = false;
+        foreach (MeasurementHistoryItem item in historyItems)
+        {
+            if (HasValueChanged(ApiDataHandler.Instance.getMeasurementHistory(), item.name, item.value, ApiDataHandler.Instance.getMeasurementData().weightUnit))
+            {
+                hasChanges = true;
+                break;
+            }
+        }
+
+        if (hasChanges)
+        {
+            int historyIndex = ApiDataHandler.Instance.getMeasurementHistory().measurmentHistory.Count;
+            ApiDataHandler.Instance.SaveMeasurementData();
+            foreach (MeasurementHistoryItem item in historyItems)
+            {
+                // Save the value in its original unit
+                item.weightUnit = ApiDataHandler.Instance.getMeasurementData().weightUnit;
+                ApiDataHandler.Instance.SaveMeasurementHistory(item, historyIndex);
+                ApiDataHandler.Instance.SetMeasurementHistory(item);
+                historyIndex++;
+            }
+            historyItems.Clear();
+            DOTween.Kill(messageText);
+            GlobalAnimator.Instance.ShowTextMessage(messageText, "Saved Successfully!", 2);
+        }
+        else
+        {
+            DOTween.Kill(messageText);
+            GlobalAnimator.Instance.ShowTextMessage(messageText, "Nothing new to save!", 2);
+        }
+        AudioController.Instance.OnButtonClick();
+    }
+
+    private bool HasValueChanged(MeasurementHistory history, string targetName, float newValue, WeightUnit newWeightUnit)
+    {
+        var filteredItems = history.measurmentHistory
+            .Where(item => item.name.ToLower() == targetName.ToLower())
+            .OrderByDescending(item =>
+            {
+                DateTime dateTime;
+                bool success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+
+                if (!success)
+                {
+                    success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+                }
+
+                if (!success)
+                {
+                    throw new FormatException($"Unable to parse dateTime: {item.dateTime}");
+                }
+
+                return dateTime;
+            })
+            .ToList();
+
+        if (filteredItems.Count() == 0)
+        {
+            Debug.Log("No history found. Treating as a new value.");
+            return true; // No history, so treat as a change
+        }
+
+        // Get the last entry
+        var lastEntry = filteredItems.First();
+        float lastValue = lastEntry.value;
+
+        // Print the comparison for debugging
+        Debug.Log($"Comparing new value: {newValue} ({newWeightUnit}) with last value: {lastValue}");
+
+        // Check if the values are different (with a small tolerance for floating-point precision)
+        float tolerance = 0.01f; // Adjust as needed
+        bool hasChanged = Math.Abs(newValue - lastValue) > tolerance;
+
+        if (!hasChanged)
+        {
+            Debug.Log("No change detected. Nothing to save.");
+        }
+
+        return hasChanged;
+    }
 }

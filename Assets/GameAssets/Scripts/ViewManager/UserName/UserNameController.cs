@@ -13,10 +13,20 @@ public class UserNameController : MonoBehaviour, PageController
     public TMP_InputField userNameInput;
     public TextMeshProUGUI messageText;
     public Button nextButton;
+    public Button backButton;
 
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
         nextButton.onClick.AddListener(Next);
+        StateManager.Instance.ShiftStep(AccountCreationStep.Username);
+
+        backButton.onClick.AddListener(() => StateManager.Instance.Backer());
+
+        /*
+        if (!string.IsNullOrEmpty(userSessionManager.Instance.mProfileUsername))
+        {
+            userNameInput.text = userSessionManager.Instance.mProfileUsername;
+        }*/
     }
     public void Next()
     {
@@ -38,7 +48,7 @@ public class UserNameController : MonoBehaviour, PageController
         StartCoroutine(CheckUsernameExists(username,userID));
     }
 
-    private IEnumerator CheckUsernameExists(string username,string userID)
+    private IEnumerator CheckUsernameExists(string username, string userID)
     {
         yield return null;
         var usernameRef = FirebaseDatabase.DefaultInstance.GetReference("usernames");
@@ -62,9 +72,17 @@ public class UserNameController : MonoBehaviour, PageController
         }
         else
         {
-            GlobalAnimator.Instance.ShowTextMessage(messageText, "Username is already taken", 2);
-            Debug.Log("Username is already taken.");
-            // Inform the user that the username is already taken
+            // Check if the username belongs to the current user
+            if (checkUserTask.Result.Value.ToString() == userID)
+            {
+                // Allow the user to keep the same username
+                StoreUsername(username, userID);
+            }
+            else
+            {
+                GlobalAnimator.Instance.ShowTextMessage(messageText, "Username is already taken", 2);
+                Debug.Log("Username is already taken.");
+            }
         }
     }
 
@@ -106,8 +124,9 @@ public class UserNameController : MonoBehaviour, PageController
         {
             if (task.IsCompleted)
             {
-                Dictionary<string, object> mData = new Dictionary<string, object> { { "data", true } };
-                StateManager.Instance.OpenStaticScreen("profile", gameObject, "weeklyGoalScreen", mData);
+                StateManager.Instance.ShiftStep(AccountCreationStep.WeeklyGoal);
+
+                StateManager.Instance.OpenStaticScreen("profile", gameObject, "weeklyGoalScreen", null);
                 PreferenceManager.Instance.SetBool("FirstTimePlanInitialized_", false);
                 Debug.Log("Username stored successfully!");
             }

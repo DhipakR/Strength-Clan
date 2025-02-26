@@ -18,11 +18,12 @@ public class MeasurementModel
     public float rightForearm;
     public float leftCalf;
     public float rightCalf;
+    public WeightUnit weightUnit; // New field to store the weight unit
 }
 [System.Serializable]
 public class MeasurementHistory
 {
-    public List<MeasurementHistoryItem> measurmentHistory=new List<MeasurementHistoryItem>();
+    public List<MeasurementHistoryItem> measurmentHistory = new List<MeasurementHistoryItem>();
 }
 [System.Serializable]
 public class MeasurementHistoryItem
@@ -30,4 +31,5 @@ public class MeasurementHistoryItem
     public string name;
     public string dateTime;
     public float value;
+    public WeightUnit weightUnit; // Add this field
 }

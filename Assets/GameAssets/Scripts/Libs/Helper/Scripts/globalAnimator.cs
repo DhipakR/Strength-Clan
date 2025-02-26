@@ -90,34 +90,57 @@ public class GlobalAnimator : GenericSingletonClass<GlobalAnimator>
     public void ApplyParallax(GameObject currentPage, GameObject targetPage, Action callbackSuccess, bool keepState = false)
     {
         Canvas canvas = currentPage.GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            Debug.LogWarning("Canvas not found in parent hierarchy.");
+            return;
+        }
+
+        if (canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+        {
+            Debug.LogWarning("Canvas is in Screen Space - Overlay mode. Switch to Screen Space - Camera or World Space.");
+            return;
+        }
+
+        if (canvas.worldCamera == null)
+        {
+            Debug.LogWarning("No camera is assigned to the Canvas.");
+            return;
+        }
+
         var currentCanvas = currentPage.GetComponent<CanvasGroup>();
         var targetCanvas = targetPage.GetComponent<CanvasGroup>();
 
         var overlayBlocker = Instantiate(Resources.Load<GameObject>("Prefabs/shared/overlayBlocker"));
+        if (overlayBlocker == null)
+        {
+            Debug.LogWarning("Failed to instantiate overlayBlocker.");
+            return;
+        }
+
+        RectTransform overlayRect = overlayBlocker.GetComponent<RectTransform>();
+        if (overlayRect == null)
+        {
+            Debug.LogWarning("overlayBlocker does not have a RectTransform component.");
+            return;
+        }
+
         overlayBlocker.transform.SetParent(currentPage.transform, false);
+        overlayRect.position = canvas.worldCamera.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, canvas.planeDistance));
+        overlayRect.sizeDelta = new Vector2(Screen.width, Screen.height);
 
-        //overlayBlocker.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-        overlayBlocker.GetComponent<RectTransform>().position = canvas.worldCamera.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, canvas.planeDistance));
-        overlayBlocker.GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Screen.height);  // Ensure it matches the screen size
-
-        overlayBlocker.GetComponent<RectTransform>().sizeDelta = new Vector2(Screen.width, Screen.height);
         overlayBlocker.GetComponent<Image>().color = new Color(0, 0, 0, 0);
         overlayBlocker.transform.SetAsLastSibling();
 
         float distanceFactor = 1.5f;
-       // targetPage.transform.position = new Vector3(Screen.width * distanceFactor, targetPage.transform.position.y, targetPage.transform.position.z);
-
         RectTransform targetRect = targetPage.GetComponent<RectTransform>();
-        
-        // Convert screen position to world position in relation to the camera
         Vector3 offScreenPosition = canvas.worldCamera.ScreenToWorldPoint(new Vector3(Screen.width * distanceFactor, Screen.height / 2f, canvas.planeDistance));
-        // Update the position of the RectTransform in world space
         targetRect.position = new Vector3(offScreenPosition.x, targetRect.position.y, targetRect.position.z);
 
         targetPage.SetActive(true);
         targetCanvas.alpha = 0.3f;
         targetPage.transform.SetAsLastSibling();
-        // new line
+
         Vector3 centerPosition = canvas.worldCamera.ScreenToWorldPoint(new Vector3(Screen.width / 2f, Screen.height / 2f, canvas.planeDistance));
 
         DOTween.Sequence()
@@ -128,7 +151,7 @@ public class GlobalAnimator : GenericSingletonClass<GlobalAnimator>
                 targetCanvas.interactable = false;
             })
             .Append(overlayBlocker.GetComponent<Image>().DOFade(0.7f, 0.3f).SetEase(Ease.Linear))
-            .Join(targetPage.transform.DOMoveX(centerPosition.x, 0.3f).SetEase(Ease.OutQuad))//.Join(targetPage.transform.DOMoveX(Screen.width / 2f, 0.3f).SetEase(Ease.OutQuad))
+            .Join(targetPage.transform.DOMoveX(centerPosition.x, 0.3f).SetEase(Ease.OutQuad))
             .Join(targetCanvas.DOFade(1f, 0.2f).SetEase(Ease.Linear))
             .OnComplete(() =>
             {

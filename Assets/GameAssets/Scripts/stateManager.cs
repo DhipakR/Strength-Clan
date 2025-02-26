@@ -1,8 +1,20 @@
 using DG.Tweening;
+using Firebase.Auth;
+using Firebase.Database;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
+using static AuthController;
+public enum AccountCreationStep
+{
+    None,
+    Username,
+    WeeklyGoal,
+    Weight,
+    JoiningDate,
+    Badge
+}
 public class StateManager : GenericSingletonClass<StateManager>
 {
     public List<GameObject> inactivePages = new List<GameObject>();
@@ -26,13 +38,14 @@ public class StateManager : GenericSingletonClass<StateManager>
         var prefabResource = Resources.Load<GameObject>(prefabPath);
         var prefab = Instantiate(prefabResource);
         var container = GameObject.FindGameObjectWithTag(newPage);
-        Debug.LogWarning($"({folderPath}) {container.transform.parent.childCount - (2 + i)}");
+        Debug.LogWarning($"(FolderPath({folderPath})) CurrentPage({currentPage}) {container.transform.parent.childCount - (2 + i)}");
 
 
         container.transform.SetSiblingIndex(container.transform.parent.childCount - (2+i));
         prefab.transform.SetParent(container.transform, false);
         var mController = prefab.GetComponent<PageController>();
         mController.onInit(data, callback);
+
 
         if (currentPage != null)
         {
@@ -153,8 +166,29 @@ public class StateManager : GenericSingletonClass<StateManager>
 
         }
     }
+    public bool CheckTutorial(string mode, string description, int tutorialId)
+    {
+        return true;
+        // Check if the tutorial is already finished
+        if (PlayerPrefs.GetInt("TutorialFinished", 0) == 1 || PlayerPrefs.GetInt($"TutorialFinishedPart{tutorialId}", 0) == 1)
+        {
+            return true;
+        }
+        else
+        {
+            // Prepare the initial data for the popup
+            List<object> initialData = new List<object> { mode, description, null, tutorialId };
 
+            // Define the callback for when the popup is closed
+            Action<List<object>> onFinish = (data) => { };
 
+            if (!GameObject.FindGameObjectWithTag("FinishWorkoutPopup"))
+            {
+                PopupController.Instance.OpenPopup("workoutLog", "ContinueWorkoutPopup", onFinish, initialData);
+            }
+            return false;
+        }
+    }
     public void onRemoveBackHistory()
     {
         foreach (GameObject page in inactivePages)
@@ -178,5 +212,111 @@ public class StateManager : GenericSingletonClass<StateManager>
             }
         }
         return false;
+    }
+    public void ShiftStep(AccountCreationStep step)
+    {
+        currentStep = step;
+    }
+
+
+    public AccountCreationStep currentStep = AccountCreationStep.None;
+
+    public void Backer(GameObject go = null)
+    {
+        Debug.LogWarning("Button clicked");
+
+        switch (currentStep)
+        {
+            case AccountCreationStep.Username:
+                DeleteAccount();
+                FirebaseSignOut();
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                break;
+
+            case AccountCreationStep.WeeklyGoal:
+                currentStep = AccountCreationStep.Username;
+                OpenStaticScreen("userName", go, "userNameScreen", null);
+                break;
+
+            case AccountCreationStep.Weight:
+                currentStep = AccountCreationStep.WeeklyGoal;
+                OpenStaticScreen("profile", go, "weeklyGoalScreen", null);
+                break;
+
+            case AccountCreationStep.JoiningDate:
+                currentStep = AccountCreationStep.Weight;
+                OpenStaticScreen("weight", gameObject, "weightScreen", null);
+                break;
+
+            case AccountCreationStep.Badge:
+                currentStep = AccountCreationStep.JoiningDate;
+                OpenStaticScreen("date", gameObject, "DateScreen", null);
+                break;
+
+            default:
+                // HandleBackAction(go); 
+                Dictionary<string, object> mData5 = new Dictionary<string, object>
+                {
+                    { AuthKey.sAuthType, AuthConstant.sAuthTypeLogin }
+                };
+                OpenStaticScreen("auth", go, "authScreen", mData5);
+                break;
+        }
+
+    }
+    private void FirebaseSignOut()
+    {
+        FirebaseAuth auth = FirebaseAuth.DefaultInstance;
+        if (auth.CurrentUser != null)
+        {
+            auth.SignOut();
+            Debug.Log("User signed out successfully.");
+        }
+        else
+        {
+            Debug.Log("No user is currently signed in.");
+        }
+    }
+
+    private async void DeleteAccount()
+    {
+        Debug.LogWarning("FF");
+
+        if (FirebaseManager.Instance.user != null)
+        {
+            try
+            {
+                // Show loader while deleting the account
+                GlobalAnimator.Instance.FadeInLoader();
+
+                // Get the current username
+                string username = userSessionManager.Instance.mProfileUsername;
+
+                // Delete the username from the "usernames" node in the Realtime Database
+                if (!string.IsNullOrEmpty(username))
+                {
+                    var usernameRef = FirebaseDatabase.DefaultInstance.GetReference("usernames");
+                    await usernameRef.Child(username).RemoveValueAsync();
+                    Debug.Log("Username deleted from the 'usernames' node.");
+                }
+
+                await FirebaseManager.Instance.user.DeleteAsync();
+                Debug.LogWarning("Account deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("Failed to delete account: " + ex.Message);
+                GlobalAnimator.Instance.FadeOutLoader();
+            }
+            finally
+            {
+                // Hide the loader regardless of success or failure
+                GlobalAnimator.Instance.FadeOutLoader();
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No user is currently signed in.");
+        }
     }
 }

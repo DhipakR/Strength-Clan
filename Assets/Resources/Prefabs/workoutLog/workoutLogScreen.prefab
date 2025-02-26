@@ -2287,7 +2287,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -35, y: -32.000015}
+  m_AnchoredPosition: {x: -35, y: -39}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 1, y: 1}
 --- !u!222 &3184716322688977366
@@ -2461,7 +2461,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Cancel
+  m_text: Discard
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 11c95f92206000c42a2f7eec4ed332f9, type: 2}
   m_sharedMaterial: {fileID: -5371140736701394580, guid: 11c95f92206000c42a2f7eec4ed332f9, type: 2}
@@ -3280,6 +3280,9 @@ MonoBehaviour:
     templeteName: Workout
     templeteNotes: 
     exerciseTemplete: []
+    dateTimeOfPauseString: 
+    dateTimePaused: 0
+    elapsedTime: 0
 --- !u!114 &5229646307687783139
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3588,7 +3591,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: -1713062603344594832}
           m_TargetAssemblyTypeName: WorkoutLogController, Assembly-CSharp
-          m_MethodName: OnBack
+          m_MethodName: OnClose
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -3911,7 +3914,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: -1713062603344594832}
         m_TargetAssemblyTypeName: WorkoutLogController, Assembly-CSharp
-        m_MethodName: OnBack
+        m_MethodName: OnClose
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

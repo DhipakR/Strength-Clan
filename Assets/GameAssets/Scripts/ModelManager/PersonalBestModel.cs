@@ -7,6 +7,8 @@ public class PersonalBestDataItem
     public string exerciseName;
     public int weight;
     public int rep;
+    public WeightUnit savedUnit; // New field to store the unit
+
 }
 
 [Serializable]

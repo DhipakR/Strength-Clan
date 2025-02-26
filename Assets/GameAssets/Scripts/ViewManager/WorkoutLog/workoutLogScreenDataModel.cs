@@ -85,7 +85,9 @@ public class workoutLogScreenDataModel : MonoBehaviour, ItemController
         //if (isTemplateCreator) threeDots.gameObject.SetActive(true);
         //else threeDots.gameObject.SetActive(false);
         exerciseNotes.text = this.exerciseTypeModel.exerciseNotes;
-        exerciseNotes.onEndEdit.AddListener(OnExerciseNotesChange); 
+        exerciseNotes.onEndEdit.AddListener(OnExerciseNotesChange);
+
+        StateManager.Instance.CheckTutorial("tutorial", "Here you can add sets, remove sets with swipe, add more exercises and remove exercises.", 4);
     }
     private void AddSetFromModel(ExerciseModel exerciseModel)
     {

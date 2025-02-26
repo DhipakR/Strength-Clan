@@ -1019,47 +1019,54 @@ public class ApiDataHandler : GenericSingletonClass<ApiDataHandler>
         // Once the task completes, process the result
         if (dataTask.IsCompleted && dataTask.Result != null)
         {
-            DataSnapshot snapshot = dataTask.Result;
-
-            friendDetails.userName = friendName;
-
-            string level = snapshot.Child("CharacterLevel").Value.ToString();
-            friendDetails.level = int.Parse(level);
-
-            friendDetails.badgeName = snapshot.Child("BadgeName").Value.ToString();
-
-            if (snapshot.HasChild("clothes"))
+            try
             {
-                friendDetails.clothe = snapshot.Child("clothes").Value.ToString();
+                DataSnapshot snapshot = dataTask.Result;
+
+                friendDetails.userName = friendName;
+
+                string level = snapshot.Child("CharacterLevel").Value.ToString();
+                friendDetails.level = int.Parse(level);
+
+                friendDetails.badgeName = snapshot.Child("BadgeName").Value.ToString();
+
+                if (snapshot.HasChild("clothes"))
+                {
+                    friendDetails.clothe = snapshot.Child("clothes").Value.ToString();
+                }
+                else { friendDetails.clothe = "no clothes"; }
+
+                string streak = snapshot.Child("streak").Value.ToString();
+                friendDetails.streak = int.Parse(streak);
+
+                string goal = snapshot.Child("weeklyGoal").Value.ToString();
+                friendDetails.goal = int.Parse(goal);
+
+                friendDetails.joiningDate = snapshot.Child("joiningDate").Value.ToString();
+
+                TextAsset achievementJsonFile = Resources.Load<TextAsset>("data/achievement");
+                string achievementJson = achievementJsonFile.text;
+                friendDetails.achievementData = JsonUtility.FromJson<AchievementData>(achievementJson);
+                ApiDataHandler.Instance.CheckCompletedAchievements(snapshot.Child("achievements"), friendDetails.achievementData);
+
+                string personalBest = snapshot.Child("personalBest").GetRawJsonValue();
+                friendDetails.personalBestData = (PersonalBestData)LoadData(personalBest, typeof(PersonalBestData));
+
+                if (snapshot.HasChild("profileImageUrl"))
+                {
+                    friendDetails.profileImageUrl = snapshot.Child("profileImageUrl").Value.ToString();
+                    StartCoroutine(LoadImageFromUrl(friendDetails.profileImageUrl, (loadedSprite) => {
+                        // This callback will receive the newly loaded sprite
+                        friendDetails.profileImage = loadedSprite;
+                    }));
+                }
+
+                friendDataModel.friendData.Add(friendDetails);
             }
-            else { friendDetails.clothe = "no clothes"; }
-
-            string streak = snapshot.Child("streak").Value.ToString();
-            friendDetails.streak = int.Parse(streak);
-
-            string goal = snapshot.Child("weeklyGoal").Value.ToString();
-            friendDetails.goal = int.Parse(goal);
-
-            friendDetails.joiningDate = snapshot.Child("joiningDate").Value.ToString();
-
-            TextAsset achievementJsonFile = Resources.Load<TextAsset>("data/achievement");
-            string achievementJson = achievementJsonFile.text;
-            friendDetails.achievementData = JsonUtility.FromJson<AchievementData>(achievementJson);
-            ApiDataHandler.Instance.CheckCompletedAchievements(snapshot.Child("achievements"), friendDetails.achievementData);
-
-            string personalBest = snapshot.Child("personalBest").GetRawJsonValue();
-            friendDetails.personalBestData = (PersonalBestData)LoadData(personalBest, typeof(PersonalBestData));
-
-            if (snapshot.HasChild("profileImageUrl"))
+            catch (Exception ex)
             {
-                friendDetails.profileImageUrl= snapshot.Child("profileImageUrl").Value.ToString();
-                StartCoroutine(LoadImageFromUrl(friendDetails.profileImageUrl, (loadedSprite) => {
-                    // This callback will receive the newly loaded sprite
-                    friendDetails.profileImage = loadedSprite;
-                }));
+                print(ex);
             }
-
-            friendDataModel.friendData.Add(friendDetails);
         }
         else
         {

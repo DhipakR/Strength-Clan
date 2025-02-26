@@ -32,6 +32,7 @@ public class PersonalBestController : MonoBehaviour, PageController
         backButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
         addExerciseButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
     }
+
     public void LoadData()
     {
         foreach (PersonalBestDataItem item in _data.exercises)

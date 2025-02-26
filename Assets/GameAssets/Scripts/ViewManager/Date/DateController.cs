@@ -12,22 +12,31 @@ public class DateController : MonoBehaviour,PageController
     public TMP_InputField monthInput;
     public TMP_InputField yearInput;
     public Button continueButton;
-    public Button backButton;
     int month;
     int year=DateTime.Now.Year;
-    bool firstTime = true;
+    public Button backButton;
+    bool firstTime;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
-        if (data.ContainsKey("firstTime"))
+        StateManager.Instance.ShiftStep(AccountCreationStep.JoiningDate);
+
+        firstTime = true;
+        try
         {
-            firstTime = (bool)data["firstTime"];
-            backButton.gameObject.SetActive(true);
-            backButton.onClick.AddListener(Back);
-            backButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
+            firstTime = (bool)data["data"];
         }
+        catch { }
         monthInput.onEndEdit.AddListener(OnMonthInputEditEnd);
         yearInput.onEndEdit.AddListener(OnYearInputEditEnd);
         continueButton.onClick.AddListener(ContinueButton);
+        if (firstTime)
+        {
+            backButton.onClick.AddListener(() => StateManager.Instance.Backer(gameObject));
+        }
+        else
+        {
+            backButton.onClick.AddListener(() => StateManager.Instance.HandleBackAction(gameObject));
+        }
     }
     public void OnMonthInputEditEnd(string input)
     {
@@ -66,13 +75,11 @@ public class DateController : MonoBehaviour,PageController
                 userSessionManager.Instance.joiningDate= date.ToString("MMM / yyyy");
                 if (firstTime)
                 {
-                    Dictionary<string, object> mData = new Dictionary<string, object> { { "firstTime", true } };
-                    StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", mData);
-                    //StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+                    StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", null);
                 }
                 else
                 {
-                    Back();
+                    StateManager.Instance.HandleBackAction(gameObject);
                 }
             }
             else
@@ -86,10 +93,4 @@ public class DateController : MonoBehaviour,PageController
             GlobalAnimator.Instance.ShowTextMessage(messageText, "Enter valid date", 2);
         }
     }
-    public void Back()
-    {
-        StateManager.Instance.HandleBackAction(gameObject);
-        StateManager.Instance.OpenFooter(null,null,false);
-    }
-
 }
