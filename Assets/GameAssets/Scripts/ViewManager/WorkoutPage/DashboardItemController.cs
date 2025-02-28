@@ -3,7 +3,6 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System;
-using UnityEngine.EventSystems;
 
 public class DashboardItemController : MonoBehaviour, ItemController
 {
@@ -17,7 +16,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
     public DefaultTempleteModel defaultTempleteModel;
     public ScrollRect parentScroll;
     private Action<object> callback;
-    List<TextMeshProUGUI> exerciseText=new List<TextMeshProUGUI>();
+    List<TextMeshProUGUI> exerciseText = new List<TextMeshProUGUI>();
     private GameObject parent;
     public void onInit(Dictionary<string, object> data, Action<object> callback = null)
     {
@@ -28,7 +27,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
         workoutNameText.text = userSessionManager.Instance.FormatStringAbc(defaultTempleteModel.templeteName);
         //editWorkoutName.textComponent.text = defaultTempleteModel.templeteNotes;
         //editWorkoutName.onEndEdit.AddListener(OnNameChanged);
-        if (playButton != null) 
+        if (playButton != null)
             playButton.onClick.AddListener(PlayButton);
         //editButton.onClick.AddListener(EditWorkoutName);
         editButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
@@ -47,16 +46,16 @@ public class DashboardItemController : MonoBehaviour, ItemController
             // Create the first GameObject (Image with mask)
             GameObject firstImageObject = new GameObject($"Image_{exerciseData.name}");
             firstImageObject.transform.SetParent(mainParentObject.transform, false); // Set it as a child of the main parent
-
+            firstImageObject.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
             // Add Image component to the first GameObject
             Image firstImage = firstImageObject.AddComponent<Image>();
             firstImage.type = Image.Type.Sliced; // Set image type to sliced
             firstImage.preserveAspect = true; // Preserve aspect ratio if needed
 
             // Load sprite from Resources folder and assign to the first image
-            Sprite firstSprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/circle"); // Adjust the path
+            Sprite firstSprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/Circle 2"); // Adjust the path
             firstImage.sprite = firstSprite;
-            firstImage.color = new Color32(236,229, 210, 255);
+            firstImage.color = new Color32(236, 229, 210, 255);
 
             // Set width, height, and pixel per unit
             RectTransform firstRectTransform = firstImageObject.GetComponent<RectTransform>();
@@ -97,7 +96,8 @@ public class DashboardItemController : MonoBehaviour, ItemController
 
             // Load sprite from Resources and assign to the second image
             overlayImage.sprite = Resources.Load<Sprite>("UIAssets/Shared/Images/Rounded Corners/profile circle/profile overlay"); ;
-            overlayImage.color= new Color32(249, 249, 241, 255);
+            overlayImage.color = new Color32(249, 249, 241, 255);
+            overlayImage.enabled = false;
 
             // Set width and height for the second image
             RectTransform overlayRectTransform = overlay.GetComponent<RectTransform>();
@@ -132,7 +132,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
             // Optional margin (uncomment if needed)
             // textMeshPro.margin = new Vector4(20, 0, 0, 0); // Optional margin
         }
-        
+
         transform.SetSiblingIndex(transform.parent.childCount - 1);
         if (exerciseParent.childCount < 7)
         {
@@ -141,7 +141,7 @@ public class DashboardItemController : MonoBehaviour, ItemController
     }
     private void OnEnable()
     {
-        foreach(TextMeshProUGUI text in exerciseText)
+        foreach (TextMeshProUGUI text in exerciseText)
         {
             SetColor(text);
         }
@@ -158,13 +158,9 @@ public class DashboardItemController : MonoBehaviour, ItemController
     }
     public void PlayButton()
     {
-        // Ensure the callback is only invoked when the playButton is clicked
-        if (EventSystem.current.currentSelectedGameObject == playButton.gameObject)
-        {
-            callback?.Invoke(defaultTempleteModel);
-            AudioController.Instance.OnButtonClick();
-            StateManager.Instance.CloseFooter();
-        }
+        callback?.Invoke(defaultTempleteModel);
+        AudioController.Instance.OnButtonClick();
+        StateManager.Instance.CloseFooter();
     }
     //public void EditWorkoutName()
     //{

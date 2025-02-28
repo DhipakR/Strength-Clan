@@ -142,7 +142,7 @@ public class CharacterController : MonoBehaviour, PageController
         }
         UpdateCharacterView();
     }
-    private void UpdateCharacterView()
+    public void UpdateCharacterView()
     {
         //userSessionManager.Instance.characterLevel = 4;
         switch (currentSide)
