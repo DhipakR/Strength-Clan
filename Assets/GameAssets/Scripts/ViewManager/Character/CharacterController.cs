@@ -25,11 +25,9 @@ public class CharacterController : MonoBehaviour, PageController
     private bool glitchfixdone = false;
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
-        print(000);
         // Set the alpha to 0 to hide the skeleton initially
         if (characterSkeletonGraphic != null && !glitchfixdone)
         {
-            print(111);
             Color skeletonColor = characterSkeletonGraphic.color;
             skeletonColor.a = 0f; // Set alpha to 0
             characterSkeletonGraphic.color = skeletonColor;
@@ -249,6 +247,9 @@ public class CharacterController : MonoBehaviour, PageController
 
         if (skeletonGraphic != null)
         {
+            // Ensure the skeleton is fully initialized
+            yield return new WaitUntil(() => skeletonGraphic.IsValid);
+
             float startAlpha = skeletonGraphic.color.a;
             float elapsedTime = 0f;
 
@@ -269,6 +270,41 @@ public class CharacterController : MonoBehaviour, PageController
             finalColor.a = targetAlpha;
             skeletonGraphic.color = finalColor;
         }
+    }
+
+    public void SetAnimation(SkeletonGraphic ske, string name, bool loop, float timeScale = 1f, Action callBack = null, Action callBackStart = null)
+    {
+        if (!ske.gameObject.activeInHierarchy) return;
+        StartCoroutine(WaitSkeleton(ske, () =>
+        {
+            // Ensure the skeleton is fully initialized
+            if (ske.SkeletonData == null)
+            {
+                Debug.LogWarning("SkeletonData is null");
+                return;
+            }
+
+            Spine.Animation runAnimation = ske.SkeletonData.FindAnimation(name);
+            if (runAnimation != null)
+            {
+                TrackEntry animationEntry = ske.AnimationState.SetAnimation(0, name, loop);
+                animationEntry.TimeScale = timeScale;
+
+                if (callBackStart != null)
+                {
+                    animationEntry.Start += trackEntry => { callBackStart(); };
+                }
+
+                if (callBack != null)
+                {
+                    animationEntry.Complete += trackEntry => { callBack(); };
+                }
+            }
+            else
+            {
+                Debug.LogWarning(string.Format("{0} is null", name));
+            }
+        }));
     }
     private void LoadSpriteFromFolder(string folderName)
     {
@@ -417,33 +453,6 @@ public class CharacterController : MonoBehaviour, PageController
                 break;
         }
         return nameSkinSet;
-    }
-    public void SetAnimation(SkeletonGraphic ske, string name, bool loop, float timeScale = 1f, Action callBack = null, Action callBackStart = null)
-    {
-        if (!ske.gameObject.activeInHierarchy) return;
-        StartCoroutine(WaitSkeleton(ske, () =>
-        {
-            Spine.Animation runAnimation = ske.SkeletonData.FindAnimation(name);
-            if (runAnimation != null)
-            {
-                TrackEntry animationEntry = ske.AnimationState.SetAnimation(0, name, loop);
-                animationEntry.TimeScale = timeScale;
-
-                if (callBackStart != null)
-                {
-                    animationEntry.Start += trackEntry => { callBackStart(); };
-                }
-
-                if (callBack != null)
-                {
-                    animationEntry.Complete += trackEntry => { callBack(); };
-                }
-            }
-            else
-            {
-                Debug.LogError(string.Format("{0} is null", name));
-            }
-        }));
     }
     #endregion
 }
