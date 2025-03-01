@@ -141,7 +141,7 @@ public class shopController : MonoBehaviour, PageController
     public void Back()
     {
         StateManager.Instance.HandleBackAction(gameObject);
-        GameObject.FindGameObjectWithTag("characterScreen").GetComponent<CharacterController>().UpdateCharacterView();
+        GameObject.FindGameObjectWithTag("characterScreen").GetComponentInChildren<CharacterController>().UpdateCharacterView();
         StateManager.Instance.OpenFooter(null, null, false);
     }
     public ShopItem GetShopItemByName(ShopModel shopModel, string itemName)
