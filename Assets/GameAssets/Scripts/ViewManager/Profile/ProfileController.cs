@@ -69,7 +69,7 @@ public class ProfileController : MonoBehaviour,PageController
     }
     public void BadgeSelection()
     {
-        Dictionary<string, object> mData = new Dictionary<string, object> {  };
+        Dictionary<string, object> mData = new Dictionary<string, object> { { "firstTime", false } };
         StateManager.Instance.OpenStaticScreen("profile", gameObject, "ChangeBadgeScreen", mData, true);
         StateManager.Instance.CloseFooter();
     }

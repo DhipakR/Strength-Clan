@@ -31,22 +31,25 @@ public class BadgeController : MonoBehaviour,PageController
     public void onInit(Dictionary<string, object> data, Action<object> callback)
     {
         StateManager.Instance.ShiftStep(AccountCreationStep.Badge);
-
+        firstTime = true;
         try
         {
-            firstTime = (bool)data["data"];
+            firstTime = (bool)data["firstTime"];
         }
         catch { }
         continuButton.onClick.AddListener(AudioController.Instance.OnButtonClick);
         continuButton.onClick.AddListener(Continu);
         if (firstTime)
         {
+            backButton.gameObject.SetActive(false);
             backButton.onClick.AddListener(() => StateManager.Instance.Backer(gameObject));
         }
         else
         {
-            backButton.onClick.AddListener(() => StateManager.Instance.HandleBackAction(gameObject));
-        }        // leftButton.onClick.AddListener(() => ChangeBadge(-1));
+            backButton.gameObject.SetActive(true);
+            backButton.onClick.AddListener(Back);
+        }        
+        // leftButton.onClick.AddListener(() => ChangeBadge(-1));
         // rightButton.onClick.AddListener(() => ChangeBadge(1));
 
         UpdateBadgeDisplay();
@@ -118,7 +121,16 @@ public class BadgeController : MonoBehaviour,PageController
             userSessionManager.Instance.badgeName = name;
 
         GlobalAnimator.Instance.FadeOutLoader();
-        StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+        if (firstTime)
+        {
+            StateManager.Instance.OpenStaticScreen("loading", gameObject, "loadingScreen", null);
+        }
+        else
+        {
+            userSessionManager.Instance.badgeChange = true;
+            userSessionManager.Instance.CheckAchievementStatus();
+            Back();
+        }
     }
 
     /*

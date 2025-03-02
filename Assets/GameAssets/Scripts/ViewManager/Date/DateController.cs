@@ -23,7 +23,7 @@ public class DateController : MonoBehaviour,PageController
         firstTime = true;
         try
         {
-            firstTime = (bool)data["data"];
+            firstTime = (bool)data["firstTime"];
         }
         catch { }
         monthInput.onEndEdit.AddListener(OnMonthInputEditEnd);
@@ -35,6 +35,7 @@ public class DateController : MonoBehaviour,PageController
         }
         else
         {
+            backButton.gameObject.SetActive(true);
             backButton.onClick.AddListener(() => StateManager.Instance.HandleBackAction(gameObject));
         }
     }
