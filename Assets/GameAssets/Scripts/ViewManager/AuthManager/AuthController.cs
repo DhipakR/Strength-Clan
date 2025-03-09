@@ -52,12 +52,12 @@ public class AuthController : MonoBehaviour, PageController
             aPageToggleText2.text = "Create an account.";
             aForgetPassword.SetActive(true);
             aReEnterPassword.gameObject.SetActive(false);
-            ChangeYPosition(aLineDevider, -185f);
-            ChangeYPosition(togglePage, -615f);
-            ChangeYPosition(contnueButton, -698f);
+            ChangeYPosition(aLineDevider, -95f);
+            ChangeYPosition(togglePage, -515f);
+            ChangeYPosition(contnueButton, -598f);
             ChangeYPosition(agoogle, -86.6f);
             ChangeYPosition(aApple, -168.3f);
-            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -50);
+            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -55);
             backButton.gameObject.SetActive(false);
         }
         else if (this.mAuthType == AuthConstant.sAuthTypeSignup)
@@ -68,10 +68,10 @@ public class AuthController : MonoBehaviour, PageController
             aPageToggleText2.text = "Log In";
             aForgetPassword.SetActive(false);
             aReEnterPassword.gameObject.SetActive(true);
-            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -100);
-            ChangeYPosition(aLineDevider, -185f);
+            ChangeYPosition(aError.transform.parent.GetComponent<RectTransform>(), -90);
+            ChangeYPosition(aLineDevider, -130f);
             togglePage.gameObject.SetActive(false);
-            ChangeYPosition(contnueButton, -698f);
+            ChangeYPosition(contnueButton, -603f);
             ChangeYPosition(agoogle, -138);
             ChangeYPosition(aApple, -220);
             aPageToggleText1.gameObject.SetActive(false);

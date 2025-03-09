@@ -38,6 +38,7 @@ public class ExerciseHistoryController : MonoBehaviour, PageController
         _exerciseHistory.Reverse();
         if (exercise.exerciseType == ExerciseType.WeightAndReps )
         {
+            headerObject.transform.parent.gameObject.SetActive(true);
             ExerciseWithDate heaviestSet = GetTopPerformance(_exerciseHistory, HistoryPerformance.HeaviestLifted);
             if (heaviestSet != null)
             {
@@ -122,6 +123,10 @@ public class ExerciseHistoryController : MonoBehaviour, PageController
                 estimate1RMText.text = "-";
 ;            }
             
+        }
+        else
+        {
+            headerObject.transform.parent.gameObject.SetActive(false);
         }
         backButton.onClick.AddListener(Back);
         backButton.onClick.AddListener(AudioController.Instance.OnButtonClick);

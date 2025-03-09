@@ -50,6 +50,7 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
             reps.text = exerciseModel.reps.ToString();
             timerText.text = exerciseModel.time.ToString();
             mile.text = exerciseModel.mile.ToString();
+            print(exerciseModel.rir + exerciseModel.rpe);
             rir.value = exerciseModel.rir;
             rpe.value = exerciseModel.rpe;
             isComplete.isOn = exerciseModel.toggle;
@@ -159,8 +160,11 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
         if(isComplete!=null)
             isComplete.onValueChanged.AddListener(OnToggleValueChange);
         UpdateToggleInteractableState();
-        OnRIRChanged(0);
-        OnRpeChanged(0);
+        if (!il)
+        {
+            OnRIRChanged(0);
+            OnRpeChanged(0);
+        }
     }
     void OffAllInteractables()
     {
@@ -293,12 +297,15 @@ public class WorkoutLogSubItem : MonoBehaviour, ItemController
 
     private void OnRIRChanged(int newRepsIndex)
     {
-        exerciseModel.rir = newRepsIndex;
+        exerciseModel.rir = newRepsIndex; // Ensure this is being set correctly
+        Debug.Log($"RIR Changed: {exerciseModel.rir}");
         UpdateToggleInteractableState();
     }
+
     private void OnRpeChanged(int newRepsIndex)
     {
-        exerciseModel.rpe = newRepsIndex;
+        exerciseModel.rpe = newRepsIndex; // Ensure this is being set correctly
+        Debug.Log($"RPE Changed: {exerciseModel.rpe}");
         UpdateToggleInteractableState();
     }
     private void OnTimerInput(string input)

@@ -111,7 +111,7 @@ public class WorkoutLogController : MonoBehaviour, PageController
     {
         if (Input.GetKeyDown(KeyCode.Escape) && back)
         {
-            OnBack();
+            OnClose();
         }
     }
     void OnBackCheck(List<object> list)
