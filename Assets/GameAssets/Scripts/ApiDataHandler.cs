@@ -513,6 +513,29 @@ public class ApiDataHandler : GenericSingletonClass<ApiDataHandler>
 
 
     }
+    /*public void SaveHistory(HistoryTempleteModel item, int index)
+    {
+        if (string.IsNullOrEmpty(item.dateTime))
+        {
+            item.dateTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        string json = JsonUtility.ToJson(item);
+        var path = "/users/" + FirebaseManager.Instance.user.UserId + "/workoutHistory/exerciseTempleteModel";
+
+        FirebaseManager.Instance.databaseReference.Child(path).Child(index.ToString()).SetRawJsonValueAsync(json).ContinueWith(task =>
+        {
+            if (task.IsCompleted)
+            {
+                Debug.Log("Workout template added with timestamp: " + item.dateTime);
+            }
+            else
+            {
+                Debug.LogError("Failed to add workout template: " + task.Exception);
+            }
+        });
+    }*/
+
     public void LoadNotesHistory()
     {
         FirebaseManager.Instance.CheckIfLocationExists("/users/" + FirebaseManager.Instance.user.UserId + "/exerciseNotes", result =>
