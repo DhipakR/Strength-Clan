@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,24 +14,38 @@ public class MeasurementHistorySubItem : MonoBehaviour,ItemController
         string name = (string)data["name"];
         float value = (float)data["value"];
         string dateTime = (string)data["dateTime"];
-        WeightUnit savedWeightUnit = (WeightUnit)data["weightUnit"]; // Get the saved weight unit
-        WeightUnit currentWeightUnit = (WeightUnit)ApiDataHandler.Instance.GetWeightUnit(); // Get the current weight unit
+        WeightUnit savedWeightUnit = (WeightUnit)data["weightUnit"];
+        WeightUnit currentWeightUnit = (WeightUnit)ApiDataHandler.Instance.GetWeightUnit(); 
 
-        // Try parsing the dateTime with both formats
+
+        string sanitizedDate = dateTime.Replace(".", "");
+
+
+        string[] formats = {
+        "MMM dd, yyyy hh:mm:ss tt", // Mar 14, 2025 10:19:02 PM
+        "MMM dd, yyyy hh:mm tt",    // Mar 14, 2025 10:19 PM
+        "MMMM dd, yyyy hh:mm:ss tt", // March 14, 2025 10:19:02 PM
+        "MMMM dd, yyyy hh:mm tt",    // March 14, 2025 10:19 PM
+        "dd MMM, yyyy hh:mm:ss tt", // 14 Mar, 2025 10:19:02 PM
+        "dd MMM, yyyy hh:mm tt",    // 14 Mar, 2025 10:19 PM
+        "yyyy-MM-dd HH:mm:ss",       // 2025-03-14 22:19:02 (ISO 8601 format)
+        "yyyy/MM/dd HH:mm:ss",       // 2025/03/14 22:19:02
+        "yyyy-MM-dd'T'HH:mm:ss",    // 2025-03-14T22:19:02 (UTC ISO format)
+        "yyyy-MM-dd'T'HH:mm:ss'Z'", // 2025-03-14T22:19:02Z (UTC with 'Z')
+        "yyyyMMdd HH:mm:ss",        // 20250314 22:19:02
+        "yyyyMMdd'T'HHmmss",        // 20250314T221902 (Compact format)
+    };
+
+        // Try parsing with multiple formats
         DateTime parsedDateTime;
-        bool success = DateTime.TryParseExact(dateTime, "MMM dd, yyyy hh:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDateTime);
+        bool success = DateTime.TryParseExact(sanitizedDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDateTime);
 
         if (!success)
         {
-            success = DateTime.TryParseExact(dateTime, "MMM dd, yyyy hh:mm tt", System.Globalization.CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedDateTime);
+            Debug.LogError($"❌ Unable to parse dateTime: {dateTime}");
+            return;
         }
 
-        if (!success)
-        {
-            throw new FormatException($"Unable to parse dateTime: {dateTime}");
-        }
-
-        // Determine if the year should be displayed
         if (parsedDateTime.Year == DateTime.Now.Year)
         {
             dateTimeText.text = parsedDateTime.ToString("MMM dd  hh:mm tt");
@@ -44,23 +58,19 @@ public class MeasurementHistorySubItem : MonoBehaviour,ItemController
         switch (name.ToLower())
         {
             case "weight":
-                // Convert the value to the current unit if necessary
                 float displayValue = value;
                 if (savedWeightUnit != currentWeightUnit)
                 {
                     if (savedWeightUnit == WeightUnit.kg && currentWeightUnit == WeightUnit.lbs)
                     {
-                        // Convert from kg to lbs
                         displayValue = userSessionManager.Instance.ConvertKgToLbs(value);
                     }
                     else if (savedWeightUnit == WeightUnit.lbs && currentWeightUnit == WeightUnit.kg)
                     {
-                        // Convert from lbs to kg
                         displayValue = userSessionManager.Instance.ConvertLbsToKg(value);
                     }
                 }
 
-                // Display the value in the current unit
                 measurementText.text = displayValue.ToString("F2") + (currentWeightUnit == WeightUnit.kg ? " kg" : " lbs");
                 break;
             case "body fat":
@@ -71,5 +81,6 @@ public class MeasurementHistorySubItem : MonoBehaviour,ItemController
                 break;
         }
     }
+
 
 }

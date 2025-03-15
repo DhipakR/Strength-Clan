@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -20,7 +20,26 @@ public class CompletwdWorkoutHistoryController : MonoBehaviour, PageController
         HistoryTempleteModel historyWorkout = (HistoryTempleteModel)data["workout"];
         workoutNameText.text = userSessionManager.Instance.FormatStringAbc(historyWorkout.templeteName);
         string savedDate = historyWorkout.dateTime;
-        DateTime parsedDate = DateTime.ParseExact(savedDate, "MMM dd, yyyy hh:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+        //DateTime parsedDate = DateTime.ParseExact(savedDate, "MMM dd, yyyy hh:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+        DateTime parsedDate;
+        string sanitizedDate = savedDate.Replace(".", ""); // Remove dots in month abbreviations
+        string[] formats = {
+    "MMM dd, yyyy hh:mm:ss tt", // Mar 14, 2025 10:19:02 PM
+    "MMM dd, yyyy hh:mm tt",    // Mar 14, 2025 10:19 PM
+    "MMMM dd, yyyy hh:mm:ss tt", // March 14, 2025 10:19:02 PM
+    "MMMM dd, yyyy hh:mm tt",    // March 14, 2025 10:19 PM
+    "yyyy-MM-dd HH:mm:ss",       // 2025-03-14 22:19:02 (ISO format)
+    "yyyy/MM/dd HH:mm:ss",       // 2025/03/14 22:19:02
+};
+
+        bool success = DateTime.TryParseExact(sanitizedDate, formats, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out parsedDate);
+
+        if (!success)
+        {
+            Debug.LogError($"❌ Unable to parse dateTime: {savedDate}");
+            parsedDate = DateTime.Now; // Use fallback to avoid crashes
+        }
+
         string formattedDate = parsedDate.ToString("dddd, dd MMMM yyyy");
         dateText.text = formattedDate;
         if (historyWorkout.completedTime > 60)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -67,22 +67,38 @@ public class MeasurementHistoryController : MonoBehaviour, PageController
             .OrderByDescending(item =>
             {
                 DateTime dateTime;
-                bool success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
+
+                string sanitizedDate = item.dateTime.Replace(".", "");
+
+                string[] formats = {
+                "MMM dd, yyyy hh:mm:ss tt", // Mar 14, 2025 10:19:02 PM
+                "MMM dd, yyyy hh:mm tt",    // Mar 14, 2025 10:19 PM
+                "MMMM dd, yyyy hh:mm:ss tt", // March 14, 2025 10:19:02 PM
+                "MMMM dd, yyyy hh:mm tt",    // March 14, 2025 10:19 PM
+                "dd MMM, yyyy hh:mm:ss tt", // 14 Mar, 2025 10:19:02 PM
+                "dd MMM, yyyy hh:mm tt",    // 14 Mar, 2025 10:19 PM
+                "yyyy-MM-dd HH:mm:ss",       // 2025-03-14 22:19:02 (ISO 8601 format)
+                "yyyy/MM/dd HH:mm:ss",       // 2025/03/14 22:19:02
+                "yyyy-MM-dd'T'HH:mm:ss",    // 2025-03-14T22:19:02 (UTC ISO format)
+                "yyyy-MM-dd'T'HH:mm:ss'Z'", // 2025-03-14T22:19:02Z (UTC with 'Z')
+                "yyyyMMdd HH:mm:ss",        // 20250314 22:19:02
+                "yyyyMMdd'T'HHmmss",        // 20250314T221902 (Compact format)
+                };
+
+                bool success = DateTime.TryParseExact(sanitizedDate, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
 
                 if (!success)
                 {
-                    success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
-                }
-
-                if (!success)
-                {
-                    throw new FormatException($"Unable to parse dateTime: {item.dateTime}");
+                    Debug.LogError($"❌ Unable to parse dateTime: {item.dateTime}");
+                    return DateTime.MinValue;
                 }
 
                 return dateTime;
             })
             .ToList();
     }
+
+
 
     public void Back()
     {

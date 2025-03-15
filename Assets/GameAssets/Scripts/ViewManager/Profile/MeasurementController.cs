@@ -255,12 +255,15 @@ public class MeasurementController : MonoBehaviour, PageController
             .OrderByDescending(item =>
             {
                 DateTime dateTime;
-                bool success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
 
-                if (!success)
-                {
-                    success = DateTime.TryParseExact(item.dateTime, "MMM dd, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
-                }
+                string sanitizedDate = item.dateTime.Replace(".", "");
+
+                bool success = DateTime.TryParseExact(sanitizedDate, "MMM dd, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime)
+                               || DateTime.TryParseExact(sanitizedDate, "MMM dd, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime)
+                               || DateTime.TryParseExact(sanitizedDate, "MMMM dd, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime)
+                               || DateTime.TryParseExact(sanitizedDate, "MMMM dd, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime)
+                               || DateTime.TryParseExact(sanitizedDate, "dd MMM, yyyy hh:mm:ss tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime)
+                               || DateTime.TryParseExact(sanitizedDate, "dd MMM, yyyy hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime);
 
                 if (!success)
                 {
@@ -271,10 +274,10 @@ public class MeasurementController : MonoBehaviour, PageController
             })
             .ToList();
 
-        if (filteredItems.Count() == 0)
+        if (filteredItems.Count == 0)
         {
             Debug.Log("No history found. Treating as a new value.");
-            return true; // No history, so treat as a change
+            return true;
         }
 
         // Get the last entry
@@ -284,7 +287,6 @@ public class MeasurementController : MonoBehaviour, PageController
         // Print the comparison for debugging
         Debug.Log($"Comparing new value: {newValue} ({newWeightUnit}) with last value: {lastValue}");
 
-        // Check if the values are different (with a small tolerance for floating-point precision)
         float tolerance = 0.01f; // Adjust as needed
         bool hasChanged = Math.Abs(newValue - lastValue) > tolerance;
 

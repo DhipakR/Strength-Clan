@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using UnityEngine.Purchasing.Extension;
 using System.Runtime.Serialization;
 using LukeWaffel.AndroidGallery;
-
+using UnityEngine.Purchasing.Security;
 
 [Serializable]
 public class Subscription
@@ -20,15 +20,16 @@ public class Subscription
     public string desc;
     public float price;
     public float timeDuration; // in days
+    public string GoogleStoreID;
+    public string AppleStoreID;
+
 }
 
 
 public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListener
 {
     IStoreController m_StoreContoller;
-
-    IAppleExtensions m_AppleExtensions;
-    //public Text restoreText;
+    IExtensionProvider m_StoreExtensionProvide;
 
     public Subscription subItem;
 
@@ -37,19 +38,8 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
     public bool IAPInitialized;
 
     public bool isSubscripted;
-
     private void Start()
     {
-        //if (PlayerPrefs.GetInt("Remove Ads") == 0)
-        //{
-        //    removedButton.SetActive(false);
-        //    removeAdsButton.SetActive(true);
-        //}
-        //else
-        //{
-        //    removedButton.SetActive(true);
-        //    removeAdsButton.SetActive(false);
-        //}
         check = true;
         SetupBuilder();
     }
@@ -61,13 +51,12 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
         {
             var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
 
-            builder.AddProduct(subItem.Id, ProductType.Subscription);
+            builder.AddProduct(subItem.Id, ProductType.Subscription, new IDs(){
+            { subItem.AppleStoreID, AppleAppStore.Name},
+            { subItem.GoogleStoreID, GooglePlay.Name},
+            });
 
             UnityPurchasing.Initialize(this, builder);
-            IAPInitialized = true;
-            //m_AppleExtensions.Initialize();
-            
-
         }
         else
         {
@@ -77,7 +66,7 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
 
     public void Refresh()
     {
-        m_AppleExtensions.RefreshAppReceipt(OnRefreshSuccess, OnRefreshFailure);
+        //m_AppleExtensions.RefreshAppReceipt(OnRefreshSuccess, OnRefreshFailure);
     }
     private void OnRefreshFailure(string obj)
     {
@@ -141,9 +130,10 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
         print("Success");
+        IAPInitialized = true;
         m_StoreContoller = controller;
-        m_AppleExtensions = extensions.GetExtension<IAppleExtensions>();
-        Refresh();
+        m_StoreExtensionProvide = extensions;
+        //Refresh();
         CheckSubscripted(subItem.Id);
     }
     #endregion
@@ -154,7 +144,6 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
 
     public void Subscription_Btn_Pressed()
     {
-        //RemoveAds();
         if (Application.internetReachability != NetworkReachability.NotReachable ||
                Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork ||
                Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork
@@ -188,16 +177,57 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
     //processing purchase
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
     {
-        //Retrive the purchased product
+        ////Retrive the purchased product
         var product = purchaseEvent.purchasedProduct;
 
-        print("Purchase Complete" + product.definition.id);
         if (product.definition.id == subItem.Id)//non consumable
         {
-            isSubscripted = true;
-            //RemoveAds();
+            Debug.Log(string.Format("ProcessPurchase: PASS. Product: '{0}'", purchaseEvent.purchasedProduct.definition.id));
+            PlayerPrefs.SetString("Receipt", purchaseEvent.purchasedProduct.receipt);
+            PlayerPrefs.Save();
+            var validator = new CrossPlatformValidator(GooglePlayTangle.Data(),
+                AppleTangle.Data(), Application.identifier);
+            try
+            {
+                var result = validator.Validate(purchaseEvent.purchasedProduct.receipt);
+                Debug.Log("Receipt is valid.");
+                foreach (IPurchaseReceipt productReceipt in result)
+                {
+                    GooglePlayReceipt google = productReceipt as GooglePlayReceipt;
+                    if (null != google)
+                    {
+                        if (IsSubActiveForGoogle(google))
+                        {
+                            Debug.Log("Subscription Active");
+                            isSubscripted = true;
+                        }
+                        else
+                        {
+                            Debug.Log("Subscription Expired");
+                            isSubscripted = false;
+                        }
+                    }
+                    AppleInAppPurchaseReceipt apple = productReceipt as AppleInAppPurchaseReceipt;
+                    if (null != apple)
+                    {
+                        if (isSubscriptionActiveForApple(apple))
+                        {
+                            Debug.Log("Subscription Active");
+                            isSubscripted = true;
+                        }
+                        else
+                        {
+                            Debug.Log("Subscription Expired");
+                            isSubscripted = false;
+                        }
+                    }
+                }
+            }
+            catch (IAPSecurityException)
+            {
+                Debug.Log("Invalid receipt, not unlocking content");
+            }
         }
-
         return PurchaseProcessingResult.Complete;
     }
     #endregion
@@ -207,39 +237,70 @@ public class IAPManager : GenericSingletonClass<IAPManager>, IDetailedStoreListe
 
     void CheckSubscripted(string id)
     {
-        if (m_StoreContoller != null)
+#if UNITY_ANDROID
+        var subProduct = m_StoreContoller.products.WithID(id);
+        if (subProduct.hasReceipt)
         {
-            var subProduct = m_StoreContoller.products.WithID(id);
-            if (subProduct != null)
+            Debug.Log("Subscription Active");
+            isSubscripted = true;
+        }
+        else
+        {
+            Debug.Log("Subscription Expired");
+            isSubscripted = false;
+        }
+#endif
+#if UNITY_IOS
+        string localsave = PlayerPrefs.GetString("Receipt", null);
+        if (!String.IsNullOrEmpty(localsave))
+        {
+            var validator = new CrossPlatformValidator(GooglePlayTangle.Data(),
+                AppleTangle.Data(), Application.identifier);
+            var localResult = validator.Validate(localsave);
+            foreach (IPurchaseReceipt productReceipt in localResult)
             {
-                try
+                AppleInAppPurchaseReceipt apple = productReceipt as AppleInAppPurchaseReceipt;
+                if (null != apple)
                 {
-                    if (subProduct.hasReceipt)
+                    if (isSubscriptionActiveForApple(apple))
                     {
-                        var subManager = new SubscriptionManager(subProduct, null);
-                        var info = subManager.getSubscriptionInfo();
-                        if (info.isSubscribed() == Result.True)
-                        {
-                            isSubscripted = true;
-                        }
-                        else
-                        {
-                            isSubscripted = false;
-                        }
+                        Debug.Log("Subscription Active");
+                        isSubscripted = true;
                     }
                     else
                     {
-                        print("receipt not found");
+                        Debug.Log("Subscription Expired");
+                        isSubscripted = false;
                     }
-                }
-                catch (Exception)
-                {
-                    print("not check in editor");
                 }
             }
         }
+#endif
     }
-
+    public bool isSubscriptionActiveForApple(AppleInAppPurchaseReceipt appleReceipt)
+    {
+        if (appleReceipt.subscriptionExpirationDate > DateTime.Now.ToUniversalTime())
+        {
+            return true; //HAS_ACTIVE_SUBSCRIPTION
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public bool IsSubActiveForGoogle(GooglePlayReceipt googleReceipt)
+    {
+        bool isActive = false;
+        GooglePlayReceipt google = googleReceipt;
+        if (null != google)
+        {
+            if (google.purchaseState == GooglePurchaseState.Purchased)
+            {
+                isActive = true;
+            }
+        }
+        return isActive;
+    }
 
     bool CheckInterNet()
     {

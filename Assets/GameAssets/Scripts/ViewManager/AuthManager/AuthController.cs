@@ -3,7 +3,7 @@ using TMPro;
 using System;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using Assets.SimpleGoogleSignIn.Scripts;
+//using Assets.SimpleGoogleSignIn.Scripts;
 using System.Collections;
 using Firebase;
 using Firebase.Auth;
@@ -35,7 +35,7 @@ public class AuthController : MonoBehaviour, PageController
 
     private string mAuthType;
 
-    public GoogleAuth GoogleAuth;
+    //public GoogleAuth GoogleAuth;
     public Text Log;
     public Text Output;
     public bool isRegistering;
@@ -82,8 +82,8 @@ public class AuthController : MonoBehaviour, PageController
         StartCoroutine(prelaodAssets());
         userSessionManager.Instance.mSidebar = false;
         aUsername.text = "";
-        GoogleAuth = new GoogleAuth();
-        GoogleAuth.TryResume(OnSignIn, OnGetAccessToken);
+        // GoogleAuth = new GoogleAuth();
+        //GoogleAuth.TryResume(OnSignIn, OnGetAccessToken);
 
         onVerifyFirstLogin();
     }
@@ -143,21 +143,21 @@ public class AuthController : MonoBehaviour, PageController
         }
     }
 
-    IEnumerator CallSavedlogins()
-    {
+    //IEnumerator CallSavedlogins()
+    //{
 
 
-        if (GoogleAuth.SavedAuth != null)
-        {
-            GlobalAnimator.Instance.FadeInLoader();
-            yield return new WaitForSeconds(2);
-            GoogleAuth.SignIn(OnSignIn, caching: true);
-            userSessionManager.Instance.OnInitialize(mAuthType, "");
-            onSignIn();
-        }
+    //    if (GoogleAuth.SavedAuth != null)
+    //    {
+    //        GlobalAnimator.Instance.FadeInLoader();
+    //        yield return new WaitForSeconds(2);
+    //        GoogleAuth.SignIn(OnSignIn, caching: true);
+    //        userSessionManager.Instance.OnInitialize(mAuthType, "");
+    //        onSignIn();
+    //    }
 
 
-    }
+    //}
     void GmailSignIn()
     {
 
@@ -171,7 +171,7 @@ public class AuthController : MonoBehaviour, PageController
         //else
         {
             GlobalAnimator.Instance.FadeInLoader();
-            GoogleAuth.SignIn(OnSignIn, caching: true);
+            // GoogleAuth.SignIn(OnSignIn, caching: true);
         }
 
 
@@ -179,43 +179,43 @@ public class AuthController : MonoBehaviour, PageController
 
     public void SignOut()
     {
-        GoogleAuth.SignOut(revokeAccessToken: true);
+        // GoogleAuth.SignOut(revokeAccessToken: true);
     }
 
     public void GetAccessToken()
     {
-        GoogleAuth.GetAccessToken(OnGetAccessToken);
+        // GoogleAuth.GetAccessToken(OnGetAccessToken);
     }
 
-    private void OnSignIn(bool success, string error, Assets.SimpleGoogleSignIn.Scripts.UserInfo userInfo)
-    {
-        if (success)
-        {
-            GlobalAnimator.Instance.FadeOutLoader();
-            Action mCallbackSuccess = () =>
-            {
-                GlobalAnimator.Instance.FadeOutLoader();
-                userSessionManager.Instance.mProfileID = FirebaseManager.Instance.user.UserId;
-                onSignIn();
-            };
-            FirebaseManager.Instance.OnTryRegisterNewAccount(userInfo.email, "z4zazgS4LaejfKcs", mCallbackSuccess, null);
-            //mAuthType = success ? $"{userInfo.name}" : error;
-            //userSessionManager.Instance.OnInitialize(mAuthType, "");
-            //onSignIn();
-        }
+    //private void OnSignIn(bool success, string error, Assets.SimpleGoogleSignIn.Scripts.UserInfo userInfo)
+    //{
+    //    if (success)
+    //    {
+    //        GlobalAnimator.Instance.FadeOutLoader();
+    //        Action mCallbackSuccess = () =>
+    //        {
+    //            GlobalAnimator.Instance.FadeOutLoader();
+    //            userSessionManager.Instance.mProfileID = FirebaseManager.Instance.user.UserId;
+    //            onSignIn();
+    //        };
+    //        FirebaseManager.Instance.OnTryRegisterNewAccount(userInfo.email, "z4zazgS4LaejfKcs", mCallbackSuccess, null);
+    //        //mAuthType = success ? $"{userInfo.name}" : error;
+    //        //userSessionManager.Instance.OnInitialize(mAuthType, "");
+    //        //onSignIn();
+    //    }
 
-    }
+    //}
 
-    private void OnGetAccessToken(bool success, string error, Assets.SimpleGoogleSignIn.Scripts.TokenResponse tokenResponse)
-    {
-        if (!success) return;
+    //private void OnGetAccessToken(bool success, string error, Assets.SimpleGoogleSignIn.Scripts.TokenResponse tokenResponse)
+    //{
+    //    if (!success) return;
 
-        var jwt = new Assets.SimpleGoogleSignIn.Scripts.JWT(tokenResponse.IdToken);
+    //    var jwt = new Assets.SimpleGoogleSignIn.Scripts.JWT(tokenResponse.IdToken);
 
-        Debug.Log($"JSON Web Token (JWT) Payload: {jwt.Payload}");
+    //    Debug.Log($"JSON Web Token (JWT) Payload: {jwt.Payload}");
 
-        jwt.ValidateSignature(GoogleAuth.ClientId, OnValidateSignature);
-    }
+    //    jwt.ValidateSignature(GoogleAuth.ClientId, OnValidateSignature);
+    //}
 
     private void OnValidateSignature(bool success, string error)
     {
